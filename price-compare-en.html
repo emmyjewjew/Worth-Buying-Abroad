@@ -34,28 +34,14 @@
   .searchbar input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 4px var(--accent2-soft);}
   .hint{color:var(--sub);font-size:13px;margin:0 0 28px;text-align:center;max-width:640px;margin-left:auto;margin-right:auto;}
 
-  .layout{display:block;margin-top:8px;}
-  .sidebar{display:flex;flex-direction:column;margin-bottom:28px;}
-  .maincol{min-width:0;}
-  .sidebar-section{padding:18px 0;border-bottom:1px solid var(--line);}
-  .sidebar-section:first-child{padding-top:0;}
-  .sidebar-section:last-child{border-bottom:none;padding-bottom:0;}
-  .sidebar-cathead{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:0;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left;}
-  .sidebar-cathead:hover{color:var(--accent2);}
-  .sidebar-cathead .collapse-icon{color:var(--sub);font-size:19px;font-weight:400;line-height:1;width:18px;text-align:center;}
-  .sidebar-brandlist{display:flex;flex-direction:column;gap:16px;margin-top:18px;}
-  .brand-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--ink);}
-  .brand-check input{appearance:none;-webkit-appearance:none;width:18px;height:18px;flex-shrink:0;border-radius:5px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;transition:all .15s;}
-  .brand-check input:checked{background:var(--accent2);border-color:var(--accent2);}
-  .brand-check input:checked::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
-  .brand-check .count{color:var(--sub);font-weight:400;font-size:13px;}
+  .popular-brands{margin:0 0 28px;}
+  .popular-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+  .brand-pillrow{display:flex;flex-wrap:wrap;gap:8px;}
+  .brand-pill{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s;}
+  .brand-pill:hover{border-color:var(--accent2);color:var(--accent2);}
+  .brand-pill .brand-pill-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:4px;}
   .grid-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:22px 0 8px;}
   .grid-label:first-child{margin-top:0;}
-
-  @media (min-width:900px){
-    .layout{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:start;}
-    .sidebar{position:sticky;top:20px;margin-bottom:0;}
-  }
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
   .pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;text-align:left;box-shadow:var(--shadow-sm);}
@@ -81,15 +67,15 @@
   .detail-thumb.emoji-thumb{font-size:46px;}
 
   .pricecards{display:flex;flex-direction:column;gap:10px;}
-  .pricecard{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+  .pricecard{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
   .pricecard.pricecard-best{background:var(--accent2-soft);border-color:transparent;}
-  .pc-top{display:grid;grid-template-columns:minmax(96px,auto) minmax(84px,auto) 1fr;gap:16px;align-items:center;}
-  .pc-left{display:flex;flex-direction:column;gap:5px;}
+  .pc-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .pc-left{flex:0 0 auto;min-width:96px;display:flex;flex-direction:column;gap:5px;}
   .pc-country{font-weight:600;font-size:14.5px;white-space:nowrap;}
-  .pc-mid{display:flex;flex-direction:column;gap:2px;}
+  .pc-priceblock{display:flex;align-items:center;gap:12px;}
+  .pc-mid{display:flex;flex-direction:column;gap:1px;}
   .pc-local{font-size:12.5px;color:var(--sub);white-space:nowrap;}
   .pc-thb{font-size:18px;font-weight:700;white-space:nowrap;}
-  .pc-diffwrap{display:flex;justify-content:flex-end;}
   .diff{display:inline-block;font-weight:600;font-size:12.5px;white-space:nowrap;padding:4px 11px;border-radius:20px;}
   .diff.cheap{background:var(--accent2-soft);color:var(--accent2);}
   .diff.exp{background:var(--worst-soft);color:var(--worst);}
@@ -97,13 +83,13 @@
   .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
   .badge.best{background:var(--accent2-soft);color:var(--accent2);}
   .badge.thai{background:var(--section);color:var(--sub);}
-  .pc-bottom{display:flex;flex-direction:column;gap:5px;padding-top:12px;border-top:1px solid rgba(20,16,10,.07);}
+  .pc-bottom{display:flex;flex-direction:column;gap:2px;padding-top:10px;border-top:1px solid rgba(20,16,10,.07);}
   .pricecard-best .pc-bottom{border-top-color:rgba(11,122,91,.16);}
-  .pc-src{font-size:13px;color:var(--sub);}
+  .pc-src{font-size:13px;color:var(--sub);line-height:1.4;}
   .pc-src .storelink{color:var(--accent2);font-weight:600;text-decoration:none;}
   .pc-src .storelink:hover{text-decoration:underline;}
-  .pc-checked{font-size:11.5px;color:#9c9284;}
-  .pc-refund{font-size:11.5px;color:var(--sub);font-style:italic;}
+  .pc-refund{font-size:11.5px;color:var(--sub);font-style:italic;line-height:1.4;}
+  .pc-checked{font-size:11.5px;color:#9c9284;line-height:1.4;}
   .note{margin:0 auto;max-width:1064px;padding:16px 18px;background:var(--section);border:1px solid var(--line);border-radius:var(--r-md);font-size:12.5px;color:var(--sub);line-height:1.7;text-align:left;}
   .calc{margin-top:22px;max-width:900px;margin-left:auto;margin-right:auto;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);}
   .calc h3{margin:0 0 6px;font-size:17px;font-weight:600;}
@@ -136,8 +122,7 @@
     header p{font-size:15px;}
     .lang-switch{top:16px;right:16px;padding:7px 12px;font-size:12px;}
     .pricecard{padding:14px 16px;}
-    .pc-top{grid-template-columns:1fr;gap:6px;}
-    .pc-diffwrap{justify-content:flex-start;}
+    .pc-top{gap:12px;}
   }
 </style>
 </head>
@@ -164,14 +149,14 @@
   </div>
   <p class="hint">Type a product name or brand to search (e.g. "chanel", "dior", "sauvage", "ysl", "cushion", "bag", "watch", "la mer")</p>
 
-  <div class="layout">
-    <aside class="sidebar" id="sidebarNav"></aside>
-    <div class="maincol">
-      <div class="productlist" id="grid"></div>
-      <div class="empty" id="empty" style="display:none;">No products found. Try a different search term.</div>
-      <div class="detail" id="detail"></div>
-    </div>
+  <div class="popular-brands">
+    <div class="popular-label">Popular Brands</div>
+    <div class="brand-pillrow" id="popularBrands"></div>
   </div>
+
+  <div class="productlist" id="grid"></div>
+  <div class="empty" id="empty" style="display:none;">No products found. Try a different search term.</div>
+  <div class="detail" id="detail"></div>
 
   <div class="calc">
     <h3>🧮 Tax-refund calculator</h3>
@@ -510,21 +495,15 @@ const PRODUCTS = [
 // ================================================================
 
 const grid = document.getElementById('grid');
-const sidebarNav = document.getElementById('sidebarNav');
+const popularBrandsEl = document.getElementById('popularBrands');
 const emptyEl = document.getElementById('empty');
 const detailEl = document.getElementById('detail');
 const searchInput = document.getElementById('search');
 let activeId = null;
 let activeSize = null;
 
-// Category order used to group the sidebar — add new categories by adding to this list
+// Category order used to group all products when browsing (not searching) — add new categories by adding to this list
 const CATEGORY_ORDER = ["Fragrance","Makeup & Skincare","Bags","Watches"];
-// Tracks which category|brand accordion sections are expanded (key = "category|brand")
-let expandedBrands = new Set();
-if(PRODUCTS.length) expandedBrands.add(PRODUCTS[0].category + '|' + PRODUCTS[0].brand);
-// Tracks which categories are expanded (outer accordion wrapping the brand accordions)
-let expandedCategories = new Set();
-if(PRODUCTS.length) expandedCategories.add(PRODUCTS[0].category);
 
 function getCheapestNonBase(rows){
   const others = rows.filter(x=>!x.isBase);
@@ -576,75 +555,34 @@ function renderGrid(list){
     return;
   }
 
-  // Normal view: only render product cards for open category/brand (nav lives in the sidebar)
+  // Normal view: show all products, grouped by category so it's easy to browse
   CATEGORY_ORDER.forEach(cat=>{
     const catProducts = list.filter(p=>p.category===cat);
-    if(!catProducts.length || !expandedCategories.has(cat)) return;
+    if(!catProducts.length) return;
 
-    const brands = [...new Set(catProducts.map(p=>p.brand))];
-    brands.forEach(brand=>{
-      const key = cat + '|' + brand;
-      if(!expandedBrands.has(key)) return;
-      const brandProducts = catProducts.filter(p=>p.brand===brand);
+    const label = document.createElement('div');
+    label.className = 'grid-label';
+    label.textContent = cat;
+    grid.appendChild(label);
 
-      const label = document.createElement('div');
-      label.className = 'grid-label';
-      label.textContent = `${cat} · ${brand}`;
-      grid.appendChild(label);
-
-      const bodyGrid = document.createElement('div');
-      bodyGrid.className = 'grid';
-      brandProducts.forEach(p=> bodyGrid.appendChild(buildCard(p)));
-      grid.appendChild(bodyGrid);
-    });
+    const bodyGrid = document.createElement('div');
+    bodyGrid.className = 'grid';
+    catProducts.forEach(p=> bodyGrid.appendChild(buildCard(p)));
+    grid.appendChild(bodyGrid);
   });
 }
 
-function renderSidebar(){
-  sidebarNav.innerHTML = '';
-  CATEGORY_ORDER.forEach(cat=>{
-    const catProducts = PRODUCTS.filter(p=>p.category===cat);
-    if(!catProducts.length) return;
-    const isCatOpen = expandedCategories.has(cat);
-
-    const section = document.createElement('div');
-    section.className = 'sidebar-section';
-
-    const head = document.createElement('button');
-    head.type = 'button';
-    head.className = 'sidebar-cathead';
-    head.innerHTML = `<span>${cat}</span><span class="collapse-icon">${isCatOpen ? '−' : '+'}</span>`;
-    head.onclick = ()=>{
-      if(expandedCategories.has(cat)) expandedCategories.delete(cat);
-      else expandedCategories.add(cat);
-      renderSidebar();
+function renderPopularBrands(){
+  const brands = [...new Set(PRODUCTS.map(p=>p.brand))];
+  popularBrandsEl.innerHTML = brands.map(brand=>{
+    const count = PRODUCTS.filter(p=>p.brand===brand).length;
+    return `<button type="button" class="brand-pill" data-brand="${brand}">${brand}<span class="brand-pill-count">${count}</span></button>`;
+  }).join('');
+  popularBrandsEl.querySelectorAll('.brand-pill').forEach(btn=>{
+    btn.onclick = ()=>{
+      searchInput.value = btn.dataset.brand;
       renderGrid(currentList());
     };
-    section.appendChild(head);
-
-    if(isCatOpen){
-      const list = document.createElement('div');
-      list.className = 'sidebar-brandlist';
-      const brands = [...new Set(catProducts.map(p=>p.brand))];
-      brands.forEach(brand=>{
-        const brandProducts = catProducts.filter(p=>p.brand===brand);
-        const key = cat + '|' + brand;
-        const isOpen = expandedBrands.has(key);
-        const label = document.createElement('label');
-        label.className = 'brand-check';
-        label.innerHTML = `<input type="checkbox"${isOpen ? ' checked' : ''}><span>${brand}</span><span class="count">(${brandProducts.length})</span>`;
-        label.querySelector('input').onchange = ()=>{
-          if(expandedBrands.has(key)) expandedBrands.delete(key);
-          else expandedBrands.add(key);
-          renderSidebar();
-          renderGrid(currentList());
-        };
-        list.appendChild(label);
-      });
-      section.appendChild(list);
-    }
-
-    sidebarNav.appendChild(section);
   });
 }
 
@@ -680,16 +618,18 @@ function showDetail(p){
             <div class="pc-country">${row.flag} ${row.country}</div>
             ${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}
           </div>
-          <div class="pc-mid">
-            <div class="pc-local">${row.localPrice.toLocaleString()} ${row.currency}</div>
-            <div class="pc-thb">฿${row.thb.toLocaleString()}</div>
+          <div class="pc-priceblock">
+            <div class="pc-mid">
+              <div class="pc-local">${row.localPrice.toLocaleString()} ${row.currency}</div>
+              <div class="pc-thb">฿${row.thb.toLocaleString()}</div>
+            </div>
+            <div class="diff ${diffClass}">${diffLabel}</div>
           </div>
-          <div class="pc-diffwrap"><div class="diff ${diffClass}">${diffLabel}</div></div>
         </div>
         <div class="pc-bottom">
           <div class="pc-src">${row.retailer} · <a class="storelink" href="${row.url}" target="_blank" rel="noopener">Visit store ↗</a>${row.altUrl ? ` · <a class="storelink" href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'Backup link'} ↗</a>` : ''}</div>
-          <div class="pc-checked">checked ${row.updated}</div>
           ${row.refundPct ? `<div class="pc-refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} after tax refund (~${Math.round(row.refundPct*100)}% of price — a rough reference figure)</div>` : ''}
+          <div class="pc-checked">checked ${row.updated}</div>
         </div>
       </div>`;
   }).join('');
@@ -758,7 +698,7 @@ if(calcPriceEl){
 }
 
 // init
-renderSidebar();
+renderPopularBrands();
 renderGrid(PRODUCTS);
 if(PRODUCTS.length){
   activeId = PRODUCTS[0].id;
