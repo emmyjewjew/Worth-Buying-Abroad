@@ -16,9 +16,14 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Sarabun","Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
-  header{position:relative;padding:52px 20px 36px;text-align:center;}
-  header h1{margin:0 0 10px;font-size:32px;font-weight:700;letter-spacing:-.01em;}
-  header p{margin:0;color:var(--sub);font-size:16px;font-weight:400;max-width:480px;margin-left:auto;margin-right:auto;}
+  header{position:relative;padding:68px 20px 44px;text-align:center;overflow:hidden;}
+  header::before{content:'';position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:680px;height:340px;background:radial-gradient(ellipse at center,rgba(11,122,91,.08),rgba(11,122,91,0) 70%);pointer-events:none;}
+  .hero-content{position:relative;z-index:1;}
+  .eyebrow{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:var(--section);color:var(--sub);font-size:12.5px;font-weight:600;margin-bottom:20px;}
+  header h1{margin:0 0 14px;font-size:37px;font-weight:700;letter-spacing:-.02em;color:var(--ink);}
+  header p{margin:0 auto 26px;color:var(--sub);font-size:17px;font-weight:400;max-width:520px;line-height:1.55;}
+  .trust-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+  .trust-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--sub);box-shadow:var(--shadow-sm);}
   .lang-switch{position:absolute;top:20px;right:20px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;box-shadow:var(--shadow-sm);transition:border-color .15s,color .15s;}
   .lang-switch:hover{border-color:var(--accent2);color:var(--accent2);}
   .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 60px;}
@@ -76,14 +81,15 @@
   .detail-thumb.emoji-thumb{font-size:46px;}
 
   .pricecards{display:flex;flex-direction:column;gap:10px;}
-  .pricecard{display:grid;grid-template-columns:minmax(96px,auto) minmax(84px,auto) 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 18px;}
+  .pricecard{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
   .pricecard.pricecard-best{background:var(--accent2-soft);border-color:transparent;}
+  .pc-top{display:grid;grid-template-columns:minmax(96px,auto) minmax(84px,auto) 1fr;gap:16px;align-items:center;}
   .pc-left{display:flex;flex-direction:column;gap:5px;}
   .pc-country{font-weight:600;font-size:14.5px;white-space:nowrap;}
   .pc-mid{display:flex;flex-direction:column;gap:2px;}
   .pc-local{font-size:12.5px;color:var(--sub);white-space:nowrap;}
   .pc-thb{font-size:18px;font-weight:700;white-space:nowrap;}
-  .pc-right{display:flex;flex-direction:column;gap:4px;align-items:flex-end;text-align:right;}
+  .pc-diffwrap{display:flex;justify-content:flex-end;}
   .diff{display:inline-block;font-weight:600;font-size:12.5px;white-space:nowrap;padding:4px 11px;border-radius:20px;}
   .diff.cheap{background:var(--accent2-soft);color:var(--accent2);}
   .diff.exp{background:var(--worst-soft);color:var(--worst);}
@@ -91,11 +97,13 @@
   .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
   .badge.best{background:var(--accent2-soft);color:var(--accent2);}
   .badge.thai{background:var(--section);color:var(--sub);}
-  .pc-src{font-size:11.5px;color:var(--sub);}
+  .pc-bottom{display:flex;flex-direction:column;gap:5px;padding-top:12px;border-top:1px solid rgba(20,16,10,.07);}
+  .pricecard-best .pc-bottom{border-top-color:rgba(11,122,91,.16);}
+  .pc-src{font-size:13px;color:var(--sub);}
   .pc-src .storelink{color:var(--accent2);font-weight:600;text-decoration:none;}
   .pc-src .storelink:hover{text-decoration:underline;}
-  .pc-checked{font-size:11px;color:#9c9284;}
-  .pc-refund{font-size:10.5px;color:var(--sub);font-style:italic;max-width:220px;}
+  .pc-checked{font-size:11.5px;color:#9c9284;}
+  .pc-refund{font-size:11.5px;color:var(--sub);font-style:italic;}
   .note{margin:0 auto;max-width:1064px;padding:16px 18px;background:var(--section);border:1px solid var(--line);border-radius:var(--r-md);font-size:12.5px;color:var(--sub);line-height:1.7;text-align:left;}
   .calc{margin-top:22px;max-width:900px;margin-left:auto;margin-right:auto;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);}
   .calc h3{margin:0 0 6px;font-size:17px;font-weight:600;}
@@ -122,20 +130,30 @@
   .sizenote{font-size:12px;color:var(--sub);margin:8px 0 14px;}
 
   @media (max-width:640px){
-    header{padding:70px 16px 28px;}
-    header h1{font-size:26px;}
+    header{padding:76px 16px 32px;}
+    header::before{width:420px;height:240px;top:-50px;}
+    header h1{font-size:27px;}
+    header p{font-size:15px;}
     .lang-switch{top:16px;right:16px;padding:7px 12px;font-size:12px;}
-    .pricecard{grid-template-columns:1fr;gap:6px;padding:14px 16px;}
-    .pc-right{align-items:flex-start;text-align:left;}
-    .pc-refund{max-width:none;}
+    .pricecard{padding:14px 16px;}
+    .pc-top{grid-template-columns:1fr;gap:6px;}
+    .pc-diffwrap{justify-content:flex-start;}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🌍 เทียบราคาสินค้าทั่วโลก</h1>
-  <p>เช็กก่อนหิ้ว — ราคาจากเว็บ official แต่ละประเทศ เทียบเป็นเงินบาท</p>
+  <div class="hero-content">
+    <div class="eyebrow">🌍 เครื่องมือเทียบราคาสากล</div>
+    <h1>เทียบราคาสินค้าทั่วโลก</h1>
+    <p>เช็กก่อนหิ้ว — ราคาจากเว็บ official แต่ละประเทศ เทียบเป็นเงินบาท ให้คุณตัดสินใจได้ง่ายขึ้น</p>
+    <div class="trust-row">
+      <span class="trust-chip">✅ ราคายืนยันจากเว็บ official</span>
+      <span class="trust-chip">🌍 5 ประเทศ</span>
+      <span class="trust-chip">🆓 ใช้ฟรี ไม่ต้องสมัคร</span>
+    </div>
+  </div>
 </header>
 
 <div class="wrap">
@@ -668,16 +686,18 @@ function showDetail(p){
 
     return `
       <div class="pricecard${row===cheapest ? ' pricecard-best' : ''}">
-        <div class="pc-left">
-          <div class="pc-country">${row.flag} ${row.country}</div>
-          ${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}
+        <div class="pc-top">
+          <div class="pc-left">
+            <div class="pc-country">${row.flag} ${row.country}</div>
+            ${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}
+          </div>
+          <div class="pc-mid">
+            <div class="pc-local">${row.localPrice.toLocaleString()} ${row.currency}</div>
+            <div class="pc-thb">฿${row.thb.toLocaleString()}</div>
+          </div>
+          <div class="pc-diffwrap"><div class="diff ${diffClass}">${diffLabel}</div></div>
         </div>
-        <div class="pc-mid">
-          <div class="pc-local">${row.localPrice.toLocaleString()} ${row.currency}</div>
-          <div class="pc-thb">฿${row.thb.toLocaleString()}</div>
-        </div>
-        <div class="pc-right">
-          <div class="diff ${diffClass}">${diffLabel}</div>
+        <div class="pc-bottom">
           <div class="pc-src">${row.retailer} · <a class="storelink" href="${row.url}" target="_blank" rel="noopener">ไปที่ร้าน ↗</a>${row.altUrl ? ` · <a class="storelink" href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'} ↗</a>` : ''}</div>
           <div class="pc-checked">เช็ก ${row.updated}</div>
           ${row.refundPct ? `<div class="pc-refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษี (~${Math.round(row.refundPct*100)}% ของราคา — ตัวเลขอ้างอิงคร่าวๆ)</div>` : ''}
