@@ -30,17 +30,20 @@
   .hint{color:var(--sub);font-size:13px;margin:0 0 28px;text-align:center;max-width:640px;margin-left:auto;margin-right:auto;}
 
   .layout{display:block;margin-top:8px;}
-  .sidebar{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:26px;}
+  .sidebar{display:flex;flex-direction:column;margin-bottom:28px;}
   .maincol{min-width:0;}
-  .cat-pill{padding:11px 20px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s;}
-  .cat-pill:hover{border-color:var(--accent2);color:var(--accent2);}
-  .cat-pill.active{background:var(--ink);border-color:var(--ink);color:#fff;}
-  .brand-pillrow{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 14px 4px;}
-  .brand-pill{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .15s;}
-  .brand-pill:hover{border-color:var(--accent2);}
-  .brand-pill .brand-pill-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:4px;}
-  .brand-pill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
-  .brand-pill.active .brand-pill-count{color:#e5f3ee;}
+  .sidebar-section{padding:18px 0;border-bottom:1px solid var(--line);}
+  .sidebar-section:first-child{padding-top:0;}
+  .sidebar-section:last-child{border-bottom:none;padding-bottom:0;}
+  .sidebar-cathead{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:0;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left;}
+  .sidebar-cathead:hover{color:var(--accent2);}
+  .sidebar-cathead .collapse-icon{color:var(--sub);font-size:19px;font-weight:400;line-height:1;width:18px;text-align:center;}
+  .sidebar-brandlist{display:flex;flex-direction:column;gap:16px;margin-top:18px;}
+  .brand-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--ink);}
+  .brand-check input{appearance:none;-webkit-appearance:none;width:18px;height:18px;flex-shrink:0;border-radius:5px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;transition:all .15s;}
+  .brand-check input:checked{background:var(--accent2);border-color:var(--accent2);}
+  .brand-check input:checked::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .brand-check .count{color:var(--sub);font-weight:400;font-size:13px;}
   .grid-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:22px 0 8px;}
   .grid-label:first-child{margin-top:0;}
 
@@ -597,40 +600,44 @@ function renderSidebar(){
     if(!catProducts.length) return;
     const isCatOpen = expandedCategories.has(cat);
 
-    const pill = document.createElement('button');
-    pill.type = 'button';
-    pill.className = 'cat-pill' + (isCatOpen ? ' active' : '');
-    pill.textContent = cat;
-    pill.onclick = ()=>{
+    const section = document.createElement('div');
+    section.className = 'sidebar-section';
+
+    const head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'sidebar-cathead';
+    head.innerHTML = `<span>${cat}</span><span class="collapse-icon">${isCatOpen ? '−' : '+'}</span>`;
+    head.onclick = ()=>{
       if(expandedCategories.has(cat)) expandedCategories.delete(cat);
       else expandedCategories.add(cat);
       renderSidebar();
       renderGrid(currentList());
     };
-    sidebarNav.appendChild(pill);
+    section.appendChild(head);
 
-    if(!isCatOpen) return;
+    if(isCatOpen){
+      const list = document.createElement('div');
+      list.className = 'sidebar-brandlist';
+      const brands = [...new Set(catProducts.map(p=>p.brand))];
+      brands.forEach(brand=>{
+        const brandProducts = catProducts.filter(p=>p.brand===brand);
+        const key = cat + '|' + brand;
+        const isOpen = expandedBrands.has(key);
+        const label = document.createElement('label');
+        label.className = 'brand-check';
+        label.innerHTML = `<input type="checkbox"${isOpen ? ' checked' : ''}><span>${brand}</span><span class="count">(${brandProducts.length})</span>`;
+        label.querySelector('input').onchange = ()=>{
+          if(expandedBrands.has(key)) expandedBrands.delete(key);
+          else expandedBrands.add(key);
+          renderSidebar();
+          renderGrid(currentList());
+        };
+        list.appendChild(label);
+      });
+      section.appendChild(list);
+    }
 
-    const brandRow = document.createElement('div');
-    brandRow.className = 'brand-pillrow';
-    const brands = [...new Set(catProducts.map(p=>p.brand))];
-    brands.forEach(brand=>{
-      const brandProducts = catProducts.filter(p=>p.brand===brand);
-      const key = cat + '|' + brand;
-      const isOpen = expandedBrands.has(key);
-      const bp = document.createElement('button');
-      bp.type = 'button';
-      bp.className = 'brand-pill' + (isOpen ? ' active' : '');
-      bp.innerHTML = `${brand}<span class="brand-pill-count">${brandProducts.length}</span>`;
-      bp.onclick = ()=>{
-        if(expandedBrands.has(key)) expandedBrands.delete(key);
-        else expandedBrands.add(key);
-        renderSidebar();
-        renderGrid(currentList());
-      };
-      brandRow.appendChild(bp);
-    });
-    sidebarNav.appendChild(brandRow);
+    sidebarNav.appendChild(section);
   });
 }
 
