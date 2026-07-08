@@ -44,6 +44,10 @@
   .pcard .name{font-weight:600;margin:4px 0 2px;font-size:15.5px;}
   .pcard .spec{font-size:12px;color:var(--sub);font-weight:400;margin:0 0 6px;}
   .pcard .meta{font-size:12.5px;color:var(--sub);}
+  .pcard-row{display:flex;gap:12px;align-items:flex-start;}
+  .pcard-body{flex:1;min-width:0;}
+  .pcard-thumb{width:48px;height:48px;object-fit:contain;border-radius:8px;background:#f5f1ea;flex-shrink:0;}
+  .emoji-thumb{display:flex;align-items:center;justify-content:center;font-size:26px;}
   .empty{padding:40px 10px;text-align:center;color:var(--sub);}
 
   @media (min-width:860px){
@@ -58,6 +62,10 @@
   .detail h2{margin:0 0 2px;font-size:20px;}
   .detail .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px;}
   .detail .spec{color:var(--sub);font-size:13.5px;font-weight:400;margin:2px 0 4px;}
+  .detail-head{display:flex;gap:16px;align-items:flex-start;}
+  .detail-headtext{flex:1;min-width:0;}
+  .detail-thumb{width:88px;height:88px;object-fit:contain;border-radius:12px;background:#f5f1ea;flex-shrink:0;}
+  .detail-thumb.emoji-thumb{font-size:48px;}
   table{width:100%;border-collapse:collapse;font-size:14.5px;}
   th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;}
   th{color:var(--sub);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;}
@@ -75,6 +83,9 @@
   .badge.thai{background:#f1eee8;color:var(--sub);}
   .src{font-size:11.5px;color:#9c9284;}
   .src a{color:#9c9284;}
+  .src .storelink{display:inline-flex;align-items:center;gap:4px;margin:6px 0 4px;padding:5px 12px;background:var(--accent2);color:#fff;border-radius:20px;font-weight:600;font-size:12px;text-decoration:none;}
+  .src .storelink:hover{opacity:.85;}
+  .checked-meta{display:block;margin-top:2px;}
   .refund{margin-top:3px;font-style:italic;color:#7a5a33;}
   .note{margin:0 auto;max-width:1064px;padding:12px 14px;background:#fdf4ec;border:1px solid #f1ddc7;border-radius:10px;font-size:12.5px;color:#7a5a33;line-height:1.6;text-align:left;}
   .calc{margin-top:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;}
@@ -170,7 +181,7 @@ const PRODUCTS = [
     category: "น้ำหอม",
     name: "Chance Eau Tendre Eau de Parfum",
     nameTh: "ชานส์ โอ ตองเดรอ โอ เดอ ปาร์ฟูม",
-    image: "🌸",
+    image: "images/chanel-chance-eau-tendre-edp.jpg",
     sizeOrder: ["35ml","50ml","100ml","150ml"],
     defaultSize: "100ml",
     // ทุกราคาดึงตรงจาก chanel.com ของแต่ละประเทศ (meta price + sibling-size list ในหน้าสินค้าจริง แต่ละไซส์แยกหน้ากัน) เมื่อ 2026-07-07
@@ -212,7 +223,7 @@ const PRODUCTS = [
     category: "น้ำหอม",
     name: "Coco Mademoiselle Eau de Parfum",
     nameTh: "โกโก้ มาดมัวแซล โอ เดอ ปาร์ฟูม",
-    image: "💐",
+    image: "images/chanel-coco-mademoiselle-edp.jpg",
     sizeOrder: ["35ml","50ml","100ml","200ml"],
     defaultSize: "100ml",
     // ทุกราคาดึงตรงจาก chanel.com ของแต่ละประเทศ (meta price + sibling-size list ในหน้าสินค้าจริง แต่ละไซส์แยกหน้ากัน) เมื่อ 2026-07-07
@@ -363,7 +374,7 @@ const PRODUCTS = [
     category: "กระเป๋า",
     name: "Small Shopping Bag (Grained Calfskin, Gold-Tone Metal)",
     nameTh: "กระเป๋าช้อปปิ้งโท้ทใบเล็ก หนังลูกวัวลายเกรน อะไหล่ทอง สีดำ",
-    image: "👜",
+    image: "images/chanel-small-shopping-bag-calfskin.jpg",
     sizeOrder: ["15 x 32 x 11.5cm"],
     defaultSize: "15 x 32 x 11.5cm",
     // กระเป๋า Chanel Small Shopping Bag คอลเลกชัน Métiers d'art / Spring-Summer 2026 (คอลเลกชันแรกที่ Matthieu Blazy ออกแบบให้ชาแนล) รหัสสินค้า AS6288-B24248-94305
@@ -387,7 +398,7 @@ const PRODUCTS = [
     category: "กระเป๋า",
     name: "CHANEL 22 Small Handbag (Shiny Calfskin, Gold-Tone Metal)",
     nameTh: "กระเป๋า CHANEL 22 ใบเล็ก หนังลูกวัวเคลือบเงา อะไหล่ทอง สีดำ",
-    image: "👜",
+    image: "images/chanel-22-small-handbag-shiny-calfskin.jpg",
     sizeOrder: ["35 x 37 x 7cm"],
     defaultSize: "35 x 37 x 7cm",
     // กระเป๋า CHANEL 22 ใบเล็ก (ทรงโฮโบ) คอลเลกชัน Spring-Summer 2026 รหัสสินค้า AS3260-B19059-94305 — ต่างจากกระเป๋า Small Shopping Bag ตัวก่อนหน้าตรงที่ใบนี้มีชื่อรุ่น/ไลน์จริง คือ "CHANEL 22" (เป็นไลน์กระเป๋าประจำแบรนด์ ไม่ใช่แค่ชื่อสินค้าทั่วไป)
@@ -410,7 +421,7 @@ const PRODUCTS = [
     category: "กระเป๋า",
     name: "CHANEL 25 Small Handbag (Calfskin, Gold-Tone Metal)",
     nameTh: "กระเป๋า CHANEL 25 ใบเล็ก หนังลูกวัว อะไหล่ทอง สีดำและสีขาว",
-    image: "👜",
+    image: "images/chanel-25-small-handbag-calfskin.jpg",
     sizeOrder: ["30 x 26 x 14cm"],
     defaultSize: "30 x 26 x 14cm",
     // กระเป๋า CHANEL 25 ใบเล็ก (ทรงโฮโบ เปิดตัวปี 2025) คอลเลกชัน Spring-Summer 2026 รหัสสินค้า AS5293-B24123-U9622 — เป็นไลน์กระเป๋าประจำแบรนด์อีกไลน์หนึ่ง (คนละไลน์กับ CHANEL 22)
@@ -433,7 +444,7 @@ const PRODUCTS = [
     category: "นาฬิกา",
     name: "Première Édition Originale Watch (Steel coated with Yellow Gold, Black Leather)",
     nameTh: "นาฬิกา Première Édition Originale สตีลเคลือบเยลโลว์โกลด์ สายหนังสีดำ หน้าปัดเคลือบแลคเกอร์สีดำ",
-    image: "⌚",
+    image: "images/chanel-premiere-edition-originale-watch.jpg",
     sizeOrder: ["26.1 x 20 x 7.6mm"],
     defaultSize: "26.1 x 20 x 7.6mm",
     // นาฬิกา CHANEL Première Édition Originale รหัสสินค้า H6951 — เป็นสินค้าหมวด "นาฬิกา" ตัวแรกในตารางนี้ (คนละหมวดกับน้ำหอม/เครื่องสำอาง/กระเป๋าที่มีอยู่แล้ว) รีอิชชูของนาฬิกาเรือนแรกของ Chanel ในไลน์ Première
@@ -507,6 +518,11 @@ function splitNameSpec(str){
   return {main: str.slice(0, idx).trim(), spec: str.slice(idx).trim()};
 }
 
+function renderThumb(image, cls){
+  if(image && image.includes('/')) return `<img class="${cls}" src="${image}" alt="" loading="lazy">`;
+  return `<div class="${cls} emoji-thumb">${image}</div>`;
+}
+
 function buildCard(p){
   const card = document.createElement('div');
   card.className = 'pcard' + (p.id===activeId ? ' active':'');
@@ -514,9 +530,14 @@ function buildCard(p){
   const cheapest = getCheapestNonBase(rows);
   const {main, spec} = splitNameSpec(p.nameTh);
   card.innerHTML = `
-    <div class="name">${p.brand} — ${main}</div>
-    ${spec ? `<div class="spec">${spec}</div>` : ''}
-    <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' ไซส์ · ' : ''}${rows.length} ประเทศ (${p.defaultSize}) · ถูกสุดที่ ${cheapest.flag} ${cheapest.country}</div>
+    <div class="pcard-row">
+      ${renderThumb(p.image, 'pcard-thumb')}
+      <div class="pcard-body">
+        <div class="name">${p.brand} — ${main}</div>
+        ${spec ? `<div class="spec">${spec}</div>` : ''}
+        <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' ไซส์ · ' : ''}${rows.length} ประเทศ (${p.defaultSize}) · ถูกสุดที่ ${cheapest.flag} ${cheapest.country}</div>
+      </div>
+    </div>
   `;
   card.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
   return card;
@@ -627,15 +648,20 @@ function showDetail(p){
         <td class="local">${row.localPrice.toLocaleString()} ${row.currency}</td>
         <td class="price">฿${row.thb.toLocaleString()}</td>
         <td class="diff ${diffClass}">${diffLabel}</td>
-        <td class="src">${row.retailer}<br><a href="${row.url}" target="_blank" rel="noopener">ลิงก์ร้าน</a>${row.altUrl ? ` · <a href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'}</a>` : ''} · เช็ก ${row.updated}${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษีนักท่องเที่ยว (ประมาณ ${Math.round(row.refundPct*100)}% ของราคา — เป็นตัวเลขอ้างอิงคร่าวๆ ไม่ใช่ราคายืนยัน)</div>` : ''}</td>
+        <td class="src">${row.retailer}<br><a class="storelink" href="${row.url}" target="_blank" rel="noopener">🔗 ไปที่ร้าน ↗</a>${row.altUrl ? ` <a class="storelink" href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'} ↗</a>` : ''}<span class="checked-meta">เช็ก ${row.updated}</span>${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษีนักท่องเที่ยว (ประมาณ ${Math.round(row.refundPct*100)}% ของราคา — เป็นตัวเลขอ้างอิงคร่าวๆ ไม่ใช่ราคายืนยัน)</div>` : ''}</td>
       </tr>`;
   }).join('');
 
   const {main: detailMain, spec: detailSpec} = splitNameSpec(p.nameTh);
   detailEl.innerHTML = `
-    <h2>${p.brand} — ${detailMain}</h2>
-    ${detailSpec ? `<div class="spec">${detailSpec}</div>` : ''}
-    <div class="sub">${p.name} · ไซส์ ${size} · เทียบราคาแปลงเป็นเงินบาท (อัตราแลกเปลี่ยนโดยประมาณ)</div>
+    <div class="detail-head">
+      ${renderThumb(p.image, 'detail-thumb')}
+      <div class="detail-headtext">
+        <h2>${p.brand} — ${detailMain}</h2>
+        ${detailSpec ? `<div class="spec">${detailSpec}</div>` : ''}
+        <div class="sub">${p.name} · ไซส์ ${size} · เทียบราคาแปลงเป็นเงินบาท (อัตราแลกเปลี่ยนโดยประมาณ)</div>
+      </div>
+    </div>
     ${sizePills}
     <table>
       <thead><tr><th>ประเทศ</th><th>ราคาท้องถิ่น</th><th>เทียบเป็นบาท</th><th>ส่วนต่างจากไทย</th><th>แหล่งข้อมูล</th></tr></thead>
