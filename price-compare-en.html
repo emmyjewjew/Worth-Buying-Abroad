@@ -23,9 +23,14 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:10px;}
   .catgroup{margin-bottom:4px;}
   .catgroup:not(:first-child){margin-top:10px;}
-  .catheader{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;padding-bottom:6px;border-bottom:2px solid var(--line);}
+  .catheader-toggle{width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:2px solid var(--line);cursor:pointer;font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;padding:0 0 8px;text-align:left;}
+  .catheader-toggle:hover{color:var(--accent2);}
+  .catheader-toggle .chevron{margin-left:auto;color:var(--sub);font-size:11px;transition:transform .15s;}
+  .catheader-toggle.open .chevron{transform:rotate(90deg);}
+  .catbody{display:none;padding-top:2px;}
+  .catbody.open{display:block;}
   .brandacc{margin-bottom:8px;}
-  .brandacc-toggle{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink);text-align:left;}
+  .brandacc-toggle{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);text-align:left;}
   .brandacc-toggle:hover{border-color:var(--accent2);}
   .brandacc-toggle .brandacc-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:auto;}
   .brandacc-toggle .chevron{color:var(--sub);font-size:11px;transition:transform .15s;}
@@ -476,6 +481,9 @@ const CATEGORY_ORDER = ["Fragrance","Makeup & Skincare","Bags","Watches"];
 // Tracks which category|brand accordion sections are expanded (key = "category|brand")
 let expandedBrands = new Set();
 if(PRODUCTS.length) expandedBrands.add(PRODUCTS[0].category + '|' + PRODUCTS[0].brand);
+// Tracks which categories are expanded (outer accordion wrapping the brand accordions)
+let expandedCategories = new Set();
+if(PRODUCTS.length) expandedCategories.add(PRODUCTS[0].category);
 
 function getCheapestNonBase(rows){
   const others = rows.filter(x=>!x.isBase);
@@ -522,12 +530,24 @@ function renderGrid(list){
     const catProducts = list.filter(p=>p.category===cat);
     if(!catProducts.length) return;
 
+    const isCatOpen = expandedCategories.has(cat);
+
     const catEl = document.createElement('div');
     catEl.className = 'catgroup';
-    const header = document.createElement('div');
-    header.className = 'catheader';
-    header.textContent = cat;
-    catEl.appendChild(header);
+
+    const catToggle = document.createElement('button');
+    catToggle.type = 'button';
+    catToggle.className = 'catheader-toggle' + (isCatOpen ? ' open' : '');
+    catToggle.innerHTML = `<span>${cat}</span><span class="chevron">▸</span>`;
+    catToggle.onclick = ()=>{
+      if(expandedCategories.has(cat)) expandedCategories.delete(cat);
+      else expandedCategories.add(cat);
+      renderGrid(currentList());
+    };
+    catEl.appendChild(catToggle);
+
+    const catBody = document.createElement('div');
+    catBody.className = 'catbody' + (isCatOpen ? ' open' : '');
 
     const brands = [...new Set(catProducts.map(p=>p.brand))];
     brands.forEach(brand=>{
@@ -557,9 +577,10 @@ function renderGrid(list){
       body.appendChild(bodyGrid);
       accEl.appendChild(body);
 
-      catEl.appendChild(accEl);
+      catBody.appendChild(accEl);
     });
 
+    catEl.appendChild(catBody);
     grid.appendChild(catEl);
   });
 }
