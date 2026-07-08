@@ -21,6 +21,17 @@
   .hint{color:var(--sub);font-size:13px;margin:0 0 18px 2px;}
   .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:10px;}
+  .catgroup{margin-bottom:4px;}
+  .catgroup:not(:first-child){margin-top:10px;}
+  .catheader{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;padding-bottom:6px;border-bottom:2px solid var(--line);}
+  .brandacc{margin-bottom:8px;}
+  .brandacc-toggle{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink);text-align:left;}
+  .brandacc-toggle:hover{border-color:var(--accent2);}
+  .brandacc-toggle .brandacc-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:auto;}
+  .brandacc-toggle .chevron{color:var(--sub);font-size:11px;transition:transform .15s;}
+  .brandacc-toggle.open .chevron{transform:rotate(90deg);}
+  .brandacc-body{display:none;padding-top:8px;}
+  .brandacc-body.open{display:block;}
   .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;text-align:left;}
   .pcard:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.06);}
   .pcard.active{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2) inset;}
@@ -110,7 +121,7 @@
 
   <div class="layout">
     <div class="sidebar">
-      <div class="grid" id="grid"></div>
+      <div class="productlist" id="grid"></div>
       <div class="empty" id="empty" style="display:none;">No products found. Try a different search term.</div>
     </div>
     <div class="maincol">
@@ -152,6 +163,7 @@ const PRODUCTS = [
   {
     id: "chanel-chance-eau-tendre-edp",
     brand: "CHANEL",
+    category: "Fragrance",
     name: "Chance Eau Tendre Eau de Parfum",
     image: "🌸",
     sizeOrder: ["35ml","50ml","100ml","150ml"],
@@ -192,6 +204,7 @@ const PRODUCTS = [
   {
     id: "chanel-coco-mademoiselle-edp",
     brand: "CHANEL",
+    category: "Fragrance",
     name: "Coco Mademoiselle Eau de Parfum",
     image: "💐",
     sizeOrder: ["35ml","50ml","100ml","200ml"],
@@ -231,6 +244,7 @@ const PRODUCTS = [
   {
     id: "dior-sauvage-edt-100",
     brand: "DIOR",
+    category: "Fragrance",
     name: "Sauvage Eau de Toilette 100ml",
     image: "🏜️",
     sizeOrder: ["100ml"],
@@ -252,6 +266,7 @@ const PRODUCTS = [
   {
     id: "ysl-y-eau-de-parfum",
     brand: "YVES SAINT LAURENT",
+    category: "Fragrance",
     name: "Y Eau de Parfum",
     image: "🖤",
     sizeOrder: ["10ml","60ml","100ml","150ml Refill"],
@@ -287,6 +302,7 @@ const PRODUCTS = [
   {
     id: "dior-forever-skin-glow",
     brand: "DIOR",
+    category: "Makeup & Skincare",
     name: "Forever Skin Glow",
     image: "🧴",
     sizeOrder: ["30ml"],
@@ -308,6 +324,7 @@ const PRODUCTS = [
   {
     id: "dior-forever-cushion-hydra-glow",
     brand: "DIOR",
+    category: "Makeup & Skincare",
     name: "Forever Cushion Hydra Glow (Case + Refill)",
     image: "🌸",
     sizeOrder: ["Case","Refill"],
@@ -333,6 +350,7 @@ const PRODUCTS = [
   {
     id: "chanel-small-shopping-bag-calfskin",
     brand: "CHANEL",
+    category: "Bags",
     name: "Small Shopping Bag (Grained Calfskin, Gold-Tone Metal)",
     image: "👜",
     sizeOrder: ["15 x 32 x 11.5cm"],
@@ -355,6 +373,7 @@ const PRODUCTS = [
   {
     id: "chanel-22-small-handbag-shiny-calfskin",
     brand: "CHANEL",
+    category: "Bags",
     name: "CHANEL 22 Small Handbag (Shiny Calfskin, Gold-Tone Metal)",
     image: "👜",
     sizeOrder: ["35 x 37 x 7cm"],
@@ -376,6 +395,7 @@ const PRODUCTS = [
   {
     id: "chanel-25-small-handbag-calfskin",
     brand: "CHANEL",
+    category: "Bags",
     name: "CHANEL 25 Small Handbag (Calfskin, Gold-Tone Metal)",
     image: "👜",
     sizeOrder: ["30 x 26 x 14cm"],
@@ -397,6 +417,7 @@ const PRODUCTS = [
   {
     id: "chanel-premiere-edition-originale-watch",
     brand: "CHANEL",
+    category: "Watches",
     name: "Première Édition Originale Watch (Steel coated with Yellow Gold, Black Leather)",
     image: "⌚",
     sizeOrder: ["26.1 x 20 x 7.6mm"],
@@ -420,6 +441,7 @@ const PRODUCTS = [
   {
     id: "lamer-balancing-treatment-lotion",
     brand: "LA MER",
+    category: "Makeup & Skincare",
     name: "The NEW Balancing Treatment Lotion",
     image: "💧",
     sizeOrder: ["150ml"],
@@ -450,6 +472,12 @@ const searchInput = document.getElementById('search');
 let activeId = null;
 let activeSize = null;
 
+// Category order used to group the sidebar — add new categories by adding to this list
+const CATEGORY_ORDER = ["Fragrance","Makeup & Skincare","Bags","Watches"];
+// Tracks which category|brand accordion sections are expanded (key = "category|brand")
+let expandedBrands = new Set();
+if(PRODUCTS.length) expandedBrands.add(PRODUCTS[0].category + '|' + PRODUCTS[0].brand);
+
 function getCheapestNonBase(rows){
   const others = rows.filter(x=>!x.isBase);
   return others.reduce((a,b)=> b.thb < a.thb ? b : a, others[0]);
@@ -461,22 +489,79 @@ function splitNameSpec(str){
   return {main: str.slice(0, idx).trim(), spec: str.slice(idx).trim()};
 }
 
+function buildCard(p){
+  const card = document.createElement('div');
+  card.className = 'pcard' + (p.id===activeId ? ' active':'');
+  const rows = p.sizes[p.defaultSize];
+  const cheapest = getCheapestNonBase(rows);
+  const {main, spec} = splitNameSpec(p.name);
+  card.innerHTML = `
+    <div class="name">${p.brand} — ${main}</div>
+    ${spec ? `<div class="spec">${spec}</div>` : ''}
+    <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' sizes · ' : ''}${rows.length} countries (${p.defaultSize}) · cheapest in ${cheapest.flag} ${cheapest.country}</div>
+  `;
+  card.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
+  return card;
+}
+
 function renderGrid(list){
   grid.innerHTML = '';
   emptyEl.style.display = list.length ? 'none' : 'block';
-  list.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = 'pcard' + (p.id===activeId ? ' active':'');
-    const rows = p.sizes[p.defaultSize];
-    const cheapest = getCheapestNonBase(rows);
-    const {main, spec} = splitNameSpec(p.name);
-    card.innerHTML = `
-      <div class="name">${p.brand} — ${main}</div>
-      ${spec ? `<div class="spec">${spec}</div>` : ''}
-      <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' sizes · ' : ''}${rows.length} countries (${p.defaultSize}) · cheapest in ${cheapest.flag} ${cheapest.country}</div>
-    `;
-    card.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
-    grid.appendChild(card);
+  const isSearching = searchInput.value.trim().length > 0;
+
+  // While searching: show a flat grid of matches, no need to open category/brand groups
+  if(isSearching){
+    const flatGrid = document.createElement('div');
+    flatGrid.className = 'grid';
+    list.forEach(p=> flatGrid.appendChild(buildCard(p)));
+    grid.appendChild(flatGrid);
+    return;
+  }
+
+  // Normal view: group by category first, then brand as a collapsible accordion within each category
+  CATEGORY_ORDER.forEach(cat=>{
+    const catProducts = list.filter(p=>p.category===cat);
+    if(!catProducts.length) return;
+
+    const catEl = document.createElement('div');
+    catEl.className = 'catgroup';
+    const header = document.createElement('div');
+    header.className = 'catheader';
+    header.textContent = cat;
+    catEl.appendChild(header);
+
+    const brands = [...new Set(catProducts.map(p=>p.brand))];
+    brands.forEach(brand=>{
+      const brandProducts = catProducts.filter(p=>p.brand===brand);
+      const key = cat + '|' + brand;
+      const isOpen = expandedBrands.has(key);
+
+      const accEl = document.createElement('div');
+      accEl.className = 'brandacc';
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'brandacc-toggle' + (isOpen ? ' open' : '');
+      toggle.innerHTML = `<span>${brand}</span><span class="brandacc-count">${brandProducts.length} items</span><span class="chevron">▸</span>`;
+      toggle.onclick = ()=>{
+        if(expandedBrands.has(key)) expandedBrands.delete(key);
+        else expandedBrands.add(key);
+        renderGrid(currentList());
+      };
+      accEl.appendChild(toggle);
+
+      const body = document.createElement('div');
+      body.className = 'brandacc-body' + (isOpen ? ' open' : '');
+      const bodyGrid = document.createElement('div');
+      bodyGrid.className = 'grid';
+      brandProducts.forEach(p=> bodyGrid.appendChild(buildCard(p)));
+      body.appendChild(bodyGrid);
+      accEl.appendChild(body);
+
+      catEl.appendChild(accEl);
+    });
+
+    grid.appendChild(catEl);
   });
 }
 
