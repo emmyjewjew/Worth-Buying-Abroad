@@ -83,7 +83,7 @@
   .badge.thai{background:#f1eee8;color:var(--sub);}
   .src{font-size:11.5px;color:#9c9284;}
   .src a{color:#9c9284;}
-  .src .storelink{display:inline-flex;align-items:center;gap:4px;margin:6px 0 4px;padding:5px 12px;background:var(--accent2);color:#fff;border-radius:20px;font-weight:600;font-size:12px;text-decoration:none;}
+  .src .storelink{display:inline-flex;align-items:center;gap:4px;margin:6px 0 4px;padding:5px 12px;background:var(--accent2);color:#fff;border-radius:20px;font-weight:600;font-size:11.5px;text-decoration:none;}
   .src .storelink:hover{opacity:.85;}
   .checked-meta{display:block;margin-top:2px;}
   .refund{margin-top:3px;font-style:italic;color:#7a5a33;}
@@ -648,7 +648,7 @@ function showDetail(p){
         <td class="local">${row.localPrice.toLocaleString()} ${row.currency}</td>
         <td class="price">฿${row.thb.toLocaleString()}</td>
         <td class="diff ${diffClass}">${diffLabel}</td>
-        <td class="src">${row.retailer}<br><a class="storelink" href="${row.url}" target="_blank" rel="noopener">🔗 ไปที่ร้าน ↗</a>${row.altUrl ? ` <a class="storelink" href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'} ↗</a>` : ''}<span class="checked-meta">เช็ก ${row.updated}</span>${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษีนักท่องเที่ยว (ประมาณ ${Math.round(row.refundPct*100)}% ของราคา — เป็นตัวเลขอ้างอิงคร่าวๆ ไม่ใช่ราคายืนยัน)</div>` : ''}</td>
+        <td class="src">${row.retailer}<br><a class="storelink" href="${row.url}" target="_blank" rel="noopener">ไปที่ร้าน ↗</a>${row.altUrl ? ` <a class="storelink" href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'} ↗</a>` : ''}<span class="checked-meta">เช็ก ${row.updated}</span>${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษีนักท่องเที่ยว (ประมาณ ${Math.round(row.refundPct*100)}% ของราคา — เป็นตัวเลขอ้างอิงคร่าวๆ ไม่ใช่ราคายืนยัน)</div>` : ''}</td>
       </tr>`;
   }).join('');
 
