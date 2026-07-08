@@ -6,117 +6,127 @@
 <title>เทียบราคาสินค้าทั่วโลก | รับหิ้วคุ้มไหม</title>
 <style>
   :root{
-    --bg:#faf7f2; --ink:#1f1b16; --sub:#6b6258; --line:#e7e0d6;
-    --accent:#b7472a; --accent2:#0e6b5a; --card:#ffffff; --best:#0e6b5a; --worst:#b7472a;
+    --bg:#faf8f5; --section:#f2efe9; --card:#ffffff;
+    --ink:#1d1d1f; --sub:#6e6e73; --line:#e5e1da;
+    --accent2:#0b7a5b; --accent2-soft:#e5f3ee; --worst:#b4483a; --worst-soft:#faeae7;
+    --r-lg:20px; --r-md:14px; --r-sm:10px;
+    --shadow-sm:0 1px 3px rgba(20,16,10,.05);
+    --shadow-md:0 6px 20px rgba(20,16,10,.07);
+    --shadow-lg:0 14px 40px rgba(20,16,10,.1);
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:"Sarabun","Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink);}
-  header{position:relative;padding:36px 20px 20px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf9,var(--bg));}
-  header h1{margin:0 0 6px;font-size:28px;letter-spacing:.3px;}
-  header p{margin:0;color:var(--sub);font-size:14.5px;}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px 18px 60px;}
-  .searchbar{display:flex;gap:8px;margin:22px 0 8px;position:relative;}
-  .searchbar input{flex:1;padding:14px 16px;border-radius:12px;border:1px solid var(--line);font-size:16px;background:var(--card);}
-  .searchbar input:focus{outline:2px solid var(--accent2);}
-  .hint{color:var(--sub);font-size:13px;margin:0 0 18px 2px;}
-  .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:10px;}
-  .catgroup{margin-bottom:4px;}
-  .catgroup:not(:first-child){margin-top:10px;}
-  .catheader-toggle{width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:2px solid var(--line);cursor:pointer;font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;padding:0 0 8px;text-align:left;}
-  .catheader-toggle:hover{color:var(--accent2);}
-  .catheader-toggle .chevron{margin-left:auto;color:var(--sub);font-size:11px;transition:transform .15s;}
-  .catheader-toggle.open .chevron{transform:rotate(90deg);}
-  .catbody{display:none;padding-top:2px;}
-  .catbody.open{display:block;}
-  .brandacc{margin-bottom:8px;}
-  .brandacc-toggle{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);text-align:left;}
-  .brandacc-toggle:hover{border-color:var(--accent2);}
-  .brandacc-toggle .brandacc-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:auto;}
-  .brandacc-toggle .chevron{color:var(--sub);font-size:11px;transition:transform .15s;}
-  .brandacc-toggle.open .chevron{transform:rotate(90deg);}
-  .brandacc-body{display:none;padding-top:8px;}
-  .brandacc-body.open{display:block;}
-  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;text-align:left;}
-  .pcard:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.06);}
-  .pcard.active{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2) inset;}
-  .pcard .brand{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;}
-  .pcard .name{font-weight:600;margin:4px 0 2px;font-size:15.5px;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Sarabun","Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  header{position:relative;padding:52px 20px 36px;text-align:center;}
+  header h1{margin:0 0 10px;font-size:32px;font-weight:700;letter-spacing:-.01em;}
+  header p{margin:0;color:var(--sub);font-size:16px;font-weight:400;max-width:480px;margin-left:auto;margin-right:auto;}
+  .lang-switch{position:absolute;top:20px;right:20px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;box-shadow:var(--shadow-sm);transition:border-color .15s,color .15s;}
+  .lang-switch:hover{border-color:var(--accent2);color:var(--accent2);}
+  .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 60px;}
+
+  .searchbar{position:relative;max-width:640px;margin:8px auto 10px;}
+  .searchbar svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--sub);pointer-events:none;}
+  .searchbar input{width:100%;padding:16px 20px 16px 48px;border-radius:16px;border:1px solid var(--line);font-size:16px;background:var(--card);box-shadow:var(--shadow-sm);transition:box-shadow .2s,border-color .2s;}
+  .searchbar input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 4px var(--accent2-soft);}
+  .hint{color:var(--sub);font-size:13px;margin:0 0 28px;text-align:center;max-width:640px;margin-left:auto;margin-right:auto;}
+
+  .cat-pillrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px;}
+  .cat-pill{padding:11px 20px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s;}
+  .cat-pill:hover{border-color:var(--accent2);color:var(--accent2);}
+  .cat-pill.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .cat-section{margin:14px 0 26px;padding:20px;background:var(--section);border-radius:var(--r-lg);}
+  .brand-pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .brand-pill{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .15s;}
+  .brand-pill:hover{border-color:var(--accent2);}
+  .brand-pill .brand-pill-count{color:var(--sub);font-weight:500;font-size:12px;margin-left:4px;}
+  .brand-pill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .brand-pill.active .brand-pill-count{color:#e5f3ee;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;text-align:left;box-shadow:var(--shadow-sm);}
+  .pcard:hover{border-color:#d8d2c6;transform:translateY(-3px);box-shadow:var(--shadow-md);}
+  .pcard.active{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2-soft),var(--shadow-sm);}
+  .pcard .name{font-weight:600;margin:0 0 2px;font-size:15px;letter-spacing:-.005em;}
   .pcard .spec{font-size:12px;color:var(--sub);font-weight:400;margin:0 0 6px;}
   .pcard .meta{font-size:12.5px;color:var(--sub);}
   .pcard-row{display:flex;gap:12px;align-items:flex-start;}
   .pcard-body{flex:1;min-width:0;}
-  .pcard-thumb{width:48px;height:48px;object-fit:contain;border-radius:8px;background:#f5f1ea;flex-shrink:0;}
+  .pcard-thumb{width:52px;height:52px;object-fit:contain;border-radius:var(--r-sm);background:var(--section);flex-shrink:0;}
   .emoji-thumb{display:flex;align-items:center;justify-content:center;font-size:26px;}
   .empty{padding:40px 10px;text-align:center;color:var(--sub);}
 
-  @media (min-width:860px){
-    .layout{grid-template-columns:280px 1fr;gap:22px;}
-    .sidebar{max-height:calc(100vh - 32px);overflow-y:auto;position:sticky;top:16px;padding-right:4px;}
-    .grid{grid-template-columns:1fr;}
-    .maincol{position:sticky;top:16px;}
-  }
-
-  .detail{margin-top:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:none;}
+  .detail{margin-top:8px;max-width:900px;margin-left:auto;margin-right:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;box-shadow:var(--shadow-md);display:none;}
   .detail.show{display:block;}
-  .detail h2{margin:0 0 2px;font-size:20px;}
-  .detail .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px;}
+  .detail h2{margin:0 0 2px;font-size:21px;font-weight:600;letter-spacing:-.01em;}
+  .detail .sub{color:var(--sub);font-size:13.5px;margin-bottom:6px;}
   .detail .spec{color:var(--sub);font-size:13.5px;font-weight:400;margin:2px 0 4px;}
-  .detail-head{display:flex;gap:16px;align-items:flex-start;}
+  .detail-head{display:flex;gap:18px;align-items:flex-start;margin-bottom:6px;}
   .detail-headtext{flex:1;min-width:0;}
-  .detail-thumb{width:88px;height:88px;object-fit:contain;border-radius:12px;background:#f5f1ea;flex-shrink:0;}
-  .detail-thumb.emoji-thumb{font-size:48px;}
-  table{width:100%;border-collapse:collapse;font-size:14.5px;}
-  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;}
-  th{color:var(--sub);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;}
+  .detail-thumb{width:92px;height:92px;object-fit:contain;border-radius:var(--r-md);background:var(--section);flex-shrink:0;}
+  .detail-thumb.emoji-thumb{font-size:46px;}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;}
+  th,td{padding:14px 10px;text-align:left;vertical-align:middle;}
+  th{color:var(--sub);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);}
+  td{border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .1s;}
+  tbody tr:hover{background:#fbf9f5;}
+  tbody tr.row-best{background:var(--accent2-soft);}
+  tbody tr.row-best:hover{background:var(--accent2-soft);}
   td.country{white-space:nowrap;}
-  td.country .cname{white-space:nowrap;}
-  td.country .badges{margin-top:4px;white-space:normal;}
-  td.price{font-weight:600;white-space:nowrap;}
+  td.country .cname{white-space:nowrap;font-weight:500;}
+  td.country .badges{margin-top:5px;white-space:normal;}
+  td.price{font-weight:600;white-space:nowrap;font-size:15px;}
   td.local{color:var(--sub);font-size:13px;white-space:nowrap;}
-  .diff{font-weight:600;white-space:nowrap;}
-  .diff.cheap{color:var(--best);}
-  .diff.exp{color:var(--worst);}
-  .diff.base{color:var(--sub);}
-  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
-  .badge.best{background:#e4f3ef;color:var(--best);}
-  .badge.thai{background:#f1eee8;color:var(--sub);}
+  .diff{display:inline-block;font-weight:600;font-size:12.5px;white-space:nowrap;padding:4px 11px;border-radius:20px;}
+  .diff.cheap{background:var(--accent2-soft);color:var(--accent2);}
+  .diff.exp{background:var(--worst-soft);color:var(--worst);}
+  .diff.base{background:var(--section);color:var(--sub);}
+  .badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
+  .badge.best{background:var(--accent2-soft);color:var(--accent2);}
+  .badge.thai{background:var(--section);color:var(--sub);}
   .src{font-size:11.5px;color:#9c9284;}
   .src a{color:#9c9284;}
-  .src .storelink{display:inline-flex;align-items:center;gap:4px;margin:6px 0 4px;padding:5px 12px;background:var(--accent2);color:#fff;border-radius:20px;font-weight:600;font-size:11.5px;text-decoration:none;}
-  .src .storelink:hover{opacity:.85;}
-  .checked-meta{display:block;margin-top:2px;}
-  .refund{margin-top:3px;font-style:italic;color:#7a5a33;}
-  .note{margin:0 auto;max-width:1064px;padding:12px 14px;background:#fdf4ec;border:1px solid #f1ddc7;border-radius:10px;font-size:12.5px;color:#7a5a33;line-height:1.6;text-align:left;}
-  .calc{margin-top:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;}
-  .calc h3{margin:0 0 6px;font-size:16.5px;}
-  .calc-hint{margin:0 0 12px;color:var(--sub);font-size:13px;line-height:1.5;}
+  .src .storelink{color:var(--accent2);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:4px;}
+  .src .storelink:hover{text-decoration:underline;}
+  .checked-meta{display:block;margin-top:4px;}
+  .refund{margin-top:4px;font-style:italic;color:var(--sub);}
+  .note{margin:0 auto;max-width:1064px;padding:16px 18px;background:var(--section);border:1px solid var(--line);border-radius:var(--r-md);font-size:12.5px;color:var(--sub);line-height:1.7;text-align:left;}
+  .calc{margin-top:22px;max-width:900px;margin-left:auto;margin-right:auto;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);}
+  .calc h3{margin:0 0 6px;font-size:17px;font-weight:600;}
+  .calc-hint{margin:0 0 14px;color:var(--sub);font-size:13px;line-height:1.6;}
   .calc-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
   .calc-countrybar{display:flex;flex-wrap:wrap;gap:8px;}
-  .calcpill{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .calcpill{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);transition:all .15s;}
   .calcpill:hover{border-color:var(--accent2);}
   .calcpill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
-  .calc input{width:100%;max-width:200px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff;}
-  .calc input:focus{outline:2px solid var(--accent2);}
-  .calc-grid{margin-top:14px;display:grid;gap:10px;}
-  .calc-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--line);}
+  .calc input{width:100%;max-width:200px;padding:12px 16px;border-radius:var(--r-sm);border:1px solid var(--line);font-size:15px;background:var(--card);}
+  .calc input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 4px var(--accent2-soft);}
+  .calc-grid{margin-top:16px;display:grid;gap:10px;}
+  .calc-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:14px 16px;background:var(--section);border-radius:var(--r-sm);}
   .calc-country{font-weight:600;font-size:14px;}
-  .calc-country b{color:var(--accent);font-weight:700;}
-  .calc-result{font-weight:700;font-size:16px;color:var(--best);text-align:right;}
-  .calc-note{grid-column:1/-1;font-size:12px;color:var(--sub);line-height:1.5;}
-  .calc-static{margin-top:10px;font-size:12.5px;color:var(--sub);line-height:1.6;}
-  footer{text-align:center;color:var(--sub);font-size:12.5px;padding:24px 18px;border-top:1px solid var(--line);}
-  .sizebar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
-  .sizepill{padding:7px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
-  .sizepill:hover{border-color:var(--accent2);}
-  .sizepill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
-  .sizenote{font-size:12px;color:var(--sub);margin:2px 0 14px;}
-  @media (max-width:560px){
-    table, thead, tbody, th, td, tr{display:block;}
+  .calc-country b{color:var(--accent2);font-weight:700;}
+  .calc-result{font-weight:700;font-size:17px;color:var(--accent2);text-align:right;}
+  .calc-note{grid-column:1/-1;font-size:12px;color:var(--sub);line-height:1.6;}
+  .calc-static{margin-top:12px;font-size:12.5px;color:var(--sub);line-height:1.7;}
+  footer{text-align:center;color:var(--sub);font-size:12.5px;padding:32px 18px 40px;}
+  .sizebar{display:inline-flex;flex-wrap:wrap;background:var(--section);border-radius:12px;padding:4px;gap:2px;margin:16px 0 6px;}
+  .sizepill{border:none;background:transparent;padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--sub);transition:all .15s;}
+  .sizepill:hover{color:var(--ink);}
+  .sizepill.active{background:var(--accent2);color:#fff;}
+  .sizenote{font-size:12px;color:var(--sub);margin:8px 0 14px;}
+
+  @media (max-width:640px){
+    header{padding:70px 16px 28px;}
+    header h1{font-size:26px;}
+    .lang-switch{top:16px;right:16px;padding:7px 12px;font-size:12px;}
+    table,thead,tbody,th,td,tr{display:block;}
     thead{display:none;}
-    tr{border-bottom:1px solid var(--line);padding:10px 0;}
-    td{border:none;padding:3px 2px;}
-    td.country{font-weight:700;font-size:15px;}
+    tbody{display:flex;flex-direction:column;gap:10px;}
+    tr{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow-sm);}
+    tr.row-best{border-color:var(--accent2);}
+    td{border:none;padding:4px 0;}
+    td.country{font-weight:600;font-size:15px;}
   }
 </style>
 </head>
@@ -125,25 +135,20 @@
 <header>
   <h1>🌍 เทียบราคาสินค้าทั่วโลก</h1>
   <p>เช็กก่อนหิ้ว — ราคาจากเว็บ official แต่ละประเทศ เทียบเป็นเงินบาท</p>
-<a href="en.html" style="position:absolute;top:16px;right:20px;color:var(--accent2);font-weight:600;font-size:13px;text-decoration:none;">English version →</a>
+<a href="en.html" class="lang-switch">English version →</a>
 </header>
 
 <div class="wrap">
 
   <div class="searchbar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     <input id="search" type="text" placeholder="ค้นหาสินค้า เช่น Chanel Chance, น้ำหอม, ยี่ห้อ..." autocomplete="off">
   </div>
   <p class="hint">พิมพ์ชื่อสินค้าหรือแบรนด์เพื่อค้นหา (เช่น "chanel", "dior", "sauvage", "ysl", "cushion", "bag", "watch", "la mer")</p>
 
-  <div class="layout">
-    <div class="sidebar">
-      <div class="productlist" id="grid"></div>
-      <div class="empty" id="empty" style="display:none;">ไม่พบสินค้าที่ค้นหา ลองพิมพ์คำอื่นดูนะ</div>
-    </div>
-    <div class="maincol">
-      <div class="detail" id="detail"></div>
-    </div>
-  </div>
+  <div class="productlist" id="grid"></div>
+  <div class="empty" id="empty" style="display:none;">ไม่พบสินค้าที่ค้นหา ลองพิมพ์คำอื่นดูนะ</div>
+  <div class="detail" id="detail"></div>
 
   <div class="calc">
     <h3>🧮 คำนวณราคาโดยประมาณหลังคืนภาษีนักท่องเที่ยว</h3>
@@ -558,63 +563,64 @@ function renderGrid(list){
     return;
   }
 
-  // ปกติ: จัดกลุ่มตามหมวดหมู่ก่อน แล้วค่อยแยกแบรนด์เป็น accordion ในแต่ละหมวด
+  // ปกติ: แถวปุ่มหมวดหมู่ (pill) ด้านบนเสมอ แล้วค่อยโชว์เนื้อหาของหมวดที่เปิดอยู่ด้านล่าง
+  const pillRow = document.createElement('div');
+  pillRow.className = 'cat-pillrow';
   CATEGORY_ORDER.forEach(cat=>{
     const catProducts = list.filter(p=>p.category===cat);
     if(!catProducts.length) return;
-
     const isCatOpen = expandedCategories.has(cat);
-
-    const catEl = document.createElement('div');
-    catEl.className = 'catgroup';
-
-    const catToggle = document.createElement('button');
-    catToggle.type = 'button';
-    catToggle.className = 'catheader-toggle' + (isCatOpen ? ' open' : '');
-    catToggle.innerHTML = `<span>${cat}</span><span class="chevron">▸</span>`;
-    catToggle.onclick = ()=>{
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = 'cat-pill' + (isCatOpen ? ' active' : '');
+    pill.textContent = cat;
+    pill.onclick = ()=>{
       if(expandedCategories.has(cat)) expandedCategories.delete(cat);
       else expandedCategories.add(cat);
       renderGrid(currentList());
     };
-    catEl.appendChild(catToggle);
+    pillRow.appendChild(pill);
+  });
+  grid.appendChild(pillRow);
 
-    const catBody = document.createElement('div');
-    catBody.className = 'catbody' + (isCatOpen ? ' open' : '');
+  CATEGORY_ORDER.forEach(cat=>{
+    const catProducts = list.filter(p=>p.category===cat);
+    if(!catProducts.length || !expandedCategories.has(cat)) return;
 
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+
+    const brandRow = document.createElement('div');
+    brandRow.className = 'brand-pillrow';
     const brands = [...new Set(catProducts.map(p=>p.brand))];
     brands.forEach(brand=>{
       const brandProducts = catProducts.filter(p=>p.brand===brand);
       const key = cat + '|' + brand;
       const isOpen = expandedBrands.has(key);
-
-      const accEl = document.createElement('div');
-      accEl.className = 'brandacc';
-
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'brandacc-toggle' + (isOpen ? ' open' : '');
-      toggle.innerHTML = `<span>${brand}</span><span class="brandacc-count">${brandProducts.length} รายการ</span><span class="chevron">▸</span>`;
-      toggle.onclick = ()=>{
+      const bp = document.createElement('button');
+      bp.type = 'button';
+      bp.className = 'brand-pill' + (isOpen ? ' active' : '');
+      bp.innerHTML = `${brand}<span class="brand-pill-count">${brandProducts.length}</span>`;
+      bp.onclick = ()=>{
         if(expandedBrands.has(key)) expandedBrands.delete(key);
         else expandedBrands.add(key);
         renderGrid(currentList());
       };
-      accEl.appendChild(toggle);
+      brandRow.appendChild(bp);
+    });
+    section.appendChild(brandRow);
 
-      const body = document.createElement('div');
-      body.className = 'brandacc-body' + (isOpen ? ' open' : '');
+    brands.forEach(brand=>{
+      const key = cat + '|' + brand;
+      if(!expandedBrands.has(key)) return;
+      const brandProducts = catProducts.filter(p=>p.brand===brand);
       const bodyGrid = document.createElement('div');
       bodyGrid.className = 'grid';
       brandProducts.forEach(p=> bodyGrid.appendChild(buildCard(p)));
-      body.appendChild(bodyGrid);
-      accEl.appendChild(body);
-
-      catBody.appendChild(accEl);
+      section.appendChild(bodyGrid);
     });
 
-    catEl.appendChild(catBody);
-    grid.appendChild(catEl);
+    grid.appendChild(section);
   });
 }
 
@@ -644,7 +650,7 @@ function showDetail(p){
     const isThaiBadge = row.isBase ? `<span class="badge thai">ไทย</span>` : '';
 
     return `
-      <tr>
+      <tr class="${row===cheapest ? 'row-best' : ''}">
         <td class="country"><span class="cname">${row.flag} ${row.country}</span>${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}</td>
         <td class="local">${row.localPrice.toLocaleString()} ${row.currency}</td>
         <td class="price">฿${row.thb.toLocaleString()}</td>

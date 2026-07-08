@@ -14,12 +14,12 @@
 
 **ทุกครั้งที่แก้เนื้อหา/ฟีเจอร์ ต้องแก้ที่ 2 ไฟล์ master ก่อน (TH+EN คู่กันเสมอ) แล้วค่อย regenerate index.html/en.html ใหม่จาก master** วิธี regenerate (ต้องใช้วิธี "overwrite content" ไม่ใช่ rename ไฟล์ เพราะบางระบบไฟล์บล็อกการ rename ทับไฟล์เดิม):
 ```bash
-perl -0pe 's{(</header>)}{<a href="en.html" style="position:absolute;top:16px;right:20px;color:var(--accent2);font-weight:600;font-size:13px;text-decoration:none;">English version →</a>\n$1}' price-compare.html > /tmp/index_new.html
+perl -0pe 's{(</header>)}{<a href="en.html" class="lang-switch">English version →</a>\n$1}' price-compare.html > /tmp/index_new.html
 cat /tmp/index_new.html > index.html
-perl -0pe 's{(</header>)}{<a href="index.html" style="position:absolute;top:16px;right:20px;color:var(--accent2);font-weight:600;font-size:13px;text-decoration:none;">ภาษาไทย →</a>\n$1}' price-compare-en.html > /tmp/en_new.html
+perl -0pe 's{(</header>)}{<a href="index.html" class="lang-switch">ภาษาไทย →</a>\n$1}' price-compare-en.html > /tmp/en_new.html
 cat /tmp/en_new.html > en.html
 ```
-แล้ว diff เช็คว่าต่างกันแค่บรรทัดลิงก์ภาษาเท่านั้น
+แล้ว diff เช็คว่าต่างกันแค่บรรทัดลิงก์ภาษาเท่านั้น (ลิงก์ใช้ class `.lang-switch` ที่นิยามไว้ใน `<style>` ของแต่ละ master — ไม่ใช่ inline style อีกต่อไปหลังรีดีไซน์ UI)
 
 ## โครงสร้างข้อมูลสินค้า (ในแท็ก `<script>` ของแต่ละไฟล์)
 - `PRODUCTS` array: แต่ละ product มี `id, brand, category, name/nameTh, sizeOrder[], defaultSize, sizes{ "<size>": [...rows] }, sizeNote?`
@@ -30,8 +30,10 @@ cat /tmp/en_new.html > en.html
 ## ฟีเจอร์หลักที่ทำไปแล้ว
 1. เทียบราคา 11 สินค้า × 5 ประเทศ พร้อม badge "ถูกที่สุด" (`getCheapestNonBase()` — อิงราคายืนยันจริงเท่านั้น)
 2. ตัวคำนวณราคาโดยประมาณหลังคืนภาษีนักท่องเที่ยว (เลือกประเทศ → กรอกราคา → โชว์ผลลัพธ์เฉพาะประเทศนั้น) รวมเพดานซื้อสูงสุดต่อวัน/ต่อครั้งของญี่ปุ่น (¥500,000/ร้าน/วัน สำหรับของใช้สิ้นเปลือง) และเกาหลีใต้ (₩1,000,000/ใบเสร็จ, ₩600,000/ร้าน/วัน, ₩5,000,000/ทริป) — ฝรั่งเศสไม่พบเพดานที่ยืนยันได้ ระบุตรงๆ ว่าไม่มีข้อมูลแทนการเดา
-3. Sidebar ฝั่งซ้าย: จัดกลุ่มตาม **หมวดหมู่ก่อน** แล้วแยก **แบรนด์เป็น accordion** ในแต่ละหมวด (กดเปิด-ปิดได้ จำสถานะเปิด/ปิดด้วย `expandedBrands` Set) — ตอนพิมพ์ค้นหาจะสลับเป็น flat list แบนราบทันที
+3. Nav แบบ pill/card (รีดีไซน์ UI ก.ค. 2026 — เดิมเป็น sidebar ฝั่งซ้ายแบบ accordion): แถวปุ่มหมวดหมู่ (`.cat-pill`) อยู่บนสุดเสมอ กดแล้ว toggle เปิด/ปิด (เก็บสถานะด้วย `expandedCategories` Set) หมวดที่เปิดจะโชว์ section ด้านล่างมีแถวปุ่มแบรนด์ (`.brand-pill`, เก็บสถานะด้วย `expandedBrands` Set คีย์ `"หมวด|แบรนด์"`) แล้วตามด้วย product card grid ของแบรนด์ที่เปิดอยู่ — เปิดได้พร้อมกันหลายหมวด/หลายแบรนด์ (multi-select เหมือนเดิม ไม่ใช่ single-select filter) ตอนพิมพ์ค้นหาจะสลับเป็น flat list แบนราบทันที (ไม่โชว์ pill nav ตอนค้นหา)
 4. เคยมีฟีเจอร์ "ช่องทางอื่นที่ถูกที่สุด" (duty-free) แต่ผู้ใช้ให้ตัดออกแล้วทั้งหมด (RA() function ถูกลบไปแล้ว) — ไม่ต้องเพิ่มกลับมาเว้นแต่ถูกขอใหม่
+5. รูปสินค้า: field `image` ใน product object เป็นได้ 2 แบบ — path รูปจริง (เช่น `images/chanel-chance-eau-tendre-edp.jpg`, เก็บไฟล์ไว้ในโฟลเดอร์ `images/`) หรือ emoji เดี่ยวๆ (fallback ตอนหารูปจริงไม่ได้) ฟังก์ชัน `renderThumb(image, cls)` เช็คว่ามี `/` ในสตริงไหมเพื่อตัดสินใจว่าจะ render เป็น `<img>` หรือ emoji div — สินค้า Dior/YSL/La Mer 5 ตัวยังเป็น emoji อยู่เพราะเว็บแบรนด์พวกนี้มีระบบกันบอทบล็อกการดึงรูปอัตโนมัติ (ลองผ่าน Claude-in-Chrome แล้วก็ยัง permission denied) ไว้ลองใหม่วันหลัง
+6. ดีไซน์ปัจจุบัน (รีดีไซน์ ก.ค. 2026): แนว Apple/Notion/Airbnb — สีพื้นหลังอุ่นๆ `#faf8f5`, การ์ดขาวมุมโค้ง เงานุ่ม, accent เขียว `#0b7a5b` ใช้เน้นราคาถูกสุด/segmented control ของไซส์, ปุ่ม "ไปที่ร้าน" เป็นลิงก์ตัวหนังสือสีเขียวธรรมดา (ไม่ใช่ปุ่มทึบ ตามฟีดแบ็กที่บอกว่าเด่นเกินไป) ตารางราคาบนมือถือ (`max-width:640px`) จะกลายเป็นการ์ดแยกรายประเทศแทนตาราง Excel-style
 
 ## สถานะ deploy ปัจจุบัน
 - Netlify site เชื่อมกับ GitHub repo แล้ว (auto-deploy เวลา repo อัปเดต) — แต่ต้องอัปโหลดไฟล์ 4 ไฟล์ล่าสุดเข้า repo เอง (ยังไม่มี automation เขียนเข้า GitHub ให้อัตโนมัติจากฝั่ง Claude/Cowork)
