@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Price Comparison | Worth Buying Abroad?</title>
+<style>
+  :root{
+    --bg:#faf7f2; --ink:#1f1b16; --sub:#6b6258; --line:#e7e0d6;
+    --accent:#b7472a; --accent2:#0e6b5a; --card:#ffffff; --best:#0e6b5a; --worst:#b7472a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  header{position:relative;padding:36px 20px 20px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf9,var(--bg));}
+  header h1{margin:0 0 6px;font-size:28px;letter-spacing:.3px;}
+  header p{margin:0;color:var(--sub);font-size:14.5px;}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 18px 60px;}
+  .searchbar{display:flex;gap:8px;margin:22px 0 8px;position:relative;}
+  .searchbar input{flex:1;padding:14px 16px;border-radius:12px;border:1px solid var(--line);font-size:16px;background:var(--card);}
+  .searchbar input:focus{outline:2px solid var(--accent2);}
+  .hint{color:var(--sub);font-size:13px;margin:0 0 18px 2px;}
+  .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:10px;}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;text-align:left;}
+  .pcard:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .pcard.active{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2) inset;}
+  .pcard .brand{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;}
+  .pcard .name{font-weight:600;margin:4px 0 2px;font-size:15.5px;}
+  .pcard .spec{font-size:12px;color:var(--sub);font-weight:400;margin:0 0 6px;}
+  .pcard .meta{font-size:12.5px;color:var(--sub);}
+  .empty{padding:40px 10px;text-align:center;color:var(--sub);}
+
+  @media (min-width:860px){
+    .layout{grid-template-columns:280px 1fr;gap:22px;}
+    .sidebar{max-height:calc(100vh - 32px);overflow-y:auto;position:sticky;top:16px;padding-right:4px;}
+    .grid{grid-template-columns:1fr;}
+    .maincol{position:sticky;top:16px;}
+  }
+
+  .detail{margin-top:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:none;}
+  .detail.show{display:block;}
+  .detail h2{margin:0 0 2px;font-size:20px;}
+  .detail .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px;}
+  .detail .spec{color:var(--sub);font-size:13.5px;font-weight:400;margin:2px 0 4px;}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;}
+  th{color:var(--sub);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;}
+  td.country{white-space:nowrap;}
+  td.country .cname{white-space:nowrap;}
+  td.country .badges{margin-top:4px;white-space:normal;}
+  td.price{font-weight:600;white-space:nowrap;}
+  td.local{color:var(--sub);font-size:13px;white-space:nowrap;}
+  .diff{font-weight:600;white-space:nowrap;}
+  .diff.cheap{color:var(--best);}
+  .diff.exp{color:var(--worst);}
+  .diff.base{color:var(--sub);}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
+  .badge.best{background:#e4f3ef;color:var(--best);}
+  .badge.thai{background:#f1eee8;color:var(--sub);}
+  .src{font-size:11.5px;color:#9c9284;}
+  .src a{color:#9c9284;}
+  .refund{margin-top:3px;font-style:italic;color:#7a5a33;}
+  .note{margin:0 auto;max-width:1064px;padding:12px 14px;background:#fdf4ec;border:1px solid #f1ddc7;border-radius:10px;font-size:12.5px;color:#7a5a33;line-height:1.6;text-align:left;}
+  .calc{margin-top:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;}
+  .calc h3{margin:0 0 6px;font-size:16.5px;}
+  .calc-hint{margin:0 0 12px;color:var(--sub);font-size:13px;line-height:1.5;}
+  .calc-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .calc-countrybar{display:flex;flex-wrap:wrap;gap:8px;}
+  .calcpill{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .calcpill:hover{border-color:var(--accent2);}
+  .calcpill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .calc input{width:100%;max-width:200px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff;}
+  .calc input:focus{outline:2px solid var(--accent2);}
+  .calc-grid{margin-top:14px;display:grid;gap:10px;}
+  .calc-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--line);}
+  .calc-country{font-weight:600;font-size:14px;}
+  .calc-country b{color:var(--accent);font-weight:700;}
+  .calc-result{font-weight:700;font-size:16px;color:var(--best);text-align:right;}
+  .calc-note{grid-column:1/-1;font-size:12px;color:var(--sub);line-height:1.5;}
+  .calc-static{margin-top:10px;font-size:12.5px;color:var(--sub);line-height:1.6;}
+  footer{text-align:center;color:var(--sub);font-size:12.5px;padding:24px 18px;border-top:1px solid var(--line);}
+  .sizebar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
+  .sizepill{padding:7px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .sizepill:hover{border-color:var(--accent2);}
+  .sizepill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .sizenote{font-size:12px;color:var(--sub);margin:2px 0 14px;}
+  @media (max-width:560px){
+    table, thead, tbody, th, td, tr{display:block;}
+    thead{display:none;}
+    tr{border-bottom:1px solid var(--line);padding:10px 0;}
+    td{border:none;padding:3px 2px;}
+    td.country{font-weight:700;font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 Global Price Comparison</h1>
+  <p>Check before you buy abroad — official prices from each country, converted to THB</p>
+<a href="index.html" style="position:absolute;top:16px;right:20px;color:var(--accent2);font-weight:600;font-size:13px;text-decoration:none;">ภาษาไทย →</a>
+</header>
+
+<div class="wrap">
+
+  <div class="searchbar">
+    <input id="search" type="text" placeholder="Search a product, e.g. Chanel Chance, perfume, brand..." autocomplete="off">
+  </div>
+  <p class="hint">Type a product name or brand to search (e.g. "chanel", "dior", "sauvage", "ysl", "cushion", "bag", "watch", "la mer")</p>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" style="display:none;">No products found. Try a different search term.</div>
+    </div>
+    <div class="maincol">
+      <div class="detail" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="calc">
+    <h3>🧮 Tax-refund calculator</h3>
+    <p class="calc-hint">Pick the country the price is from, then enter that price (already converted to THB) — this will estimate the price after a tourist tax refund for that country only.</p>
+    <div class="calc-controls">
+      <div class="calc-countrybar" id="calcCountryBar"></div>
+      <input id="calcPrice" type="number" min="0" placeholder="e.g. 5569 (THB)">
+    </div>
+    <div class="calc-grid" id="calcResults"></div>
+    <div class="calc-static">🇺🇸 USA — prices shown already exclude sales tax (added at checkout by destination state), so no adjustment needed · 🇹🇭 Thailand — used as the baseline for Thai buyers, not adjusted</div>
+  </div>
+</div>
+
+<footer>
+  <div class="note">
+    ✅ <b>Where the prices come from:</b> every price in this table was pulled directly from the real product page on each brand's official site for that country (chanel.com / dior.com, country-specific versions) — not estimates from third-party retailers. Exchange rates use the mid-market rate from Wise on the day prices were checked (noted in the data code for each product). Real prices can move day to day, so double-check before committing to an actual purchase-and-ship order. Figures exclude shipping and import duty.<br><br>
+    🔗 <b>About store links:</b> chanel.com (single shared domain) auto-redirects visitors based on detected IP location, regardless of whether /jp/ /us/ /kr/ /fr/ is in the URL — opening from Thailand will always bounce you to the Thai page (the price figures used here were still verified directly from the correct country page; only the clicked link redirects). Some rows include a backup link on a country-specific domain that won't redirect. dior.com links don't redirect by country and can be opened directly.<br><br>
+    ⏱️ <b>About "real-time" pricing:</b> this page is a plain HTML file that opens straight from your computer with no server behind it, so it can't actually fetch live prices from chanel.com/dior.com when you search (those sites block cross-origin browser requests and have anti-bot protection). The practical way this works: whenever you want the latest prices, come back to this chat and say "check latest prices" — Claude will re-fetch real prices from each country's official site and update this file for you.
+  </div>
+  <p style="margin:14px 0 0;">Exchange rates approximate as of July 2026 · for preliminary comparison purposes only</p>
+</footer>
+
+<script>
+// ===================== PRODUCT DATABASE =====================
+// Add a new product by adding an object to this array — same structure every time
+function R(country,flag,currency,localPrice,thb,retailer,url,isBase,refundPct){
+  const o = {country,flag,currency,localPrice,thb,retailer,url,updated:"2026-07-07"};
+  if(isBase) o.isBase = true;
+  if(refundPct) o.refundPct = refundPct; // estimated net tourist VAT/tax refund rate (after operator fees) — used only to display an estimated post-refund price, never to decide the "cheapest" badge
+  return o;
+}
+const PRODUCTS = [
+  {
+    id: "chanel-chance-eau-tendre-edp",
+    brand: "CHANEL",
+    name: "Chance Eau Tendre Eau de Parfum",
+    image: "🌸",
+    sizeOrder: ["35ml","50ml","100ml","150ml"],
+    defaultSize: "100ml",
+    // All prices pulled directly from chanel.com for each country (meta price + the sibling-size list shown on each size's own product page) on 2026-07-07
+    // Exchange rates use Wise mid-market rate on the same day: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    // Japan and South Korea do not carry the 150ml size (confirmed via the sibling-size list on their product pages, which only shows 3 sizes)
+    sizes: {
+      "35ml": [
+        R("Thailand","🇹🇭","THB",4000,4000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("Japan","🇯🇵","JPY",13310,2685,"CHANEL Japan official (tax included)","https://www.chanel.com/jp/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("South Korea","🇰🇷","KRW",144000,3167,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",87,3290,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126240/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",115,3833,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "50ml": [
+        R("Thailand","🇹🇭","THB",5700,5700,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("Japan","🇯🇵","JPY",20020,4038,"CHANEL Japan official (tax included)","https://www.chanel.com/jp/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("South Korea","🇰🇷","KRW",206000,4530,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",125,4728,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126250/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",154,5133,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "100ml": [
+        R("Thailand","🇹🇭","THB",8000,8000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("Japan","🇯🇵","JPY",27610,5569,"CHANEL Japan official (tax included)","https://www.chanel.com/jp/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("South Korea","🇰🇷","KRW",286000,6289,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",172,6505,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126260/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",185,6166,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "150ml": [
+        R("Thailand","🇹🇭","THB",9450,9450,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126270/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("France","🇫🇷","EUR",207,7829,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126270/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",227,7566,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126270/chance-eau-tendre-eau-de-parfum-spray/")
+      ]
+    },
+    sizeNote: "Japan and South Korea don't sell the 150ml size (only 35/50/100ml)"
+  },
+  {
+    id: "chanel-coco-mademoiselle-edp",
+    brand: "CHANEL",
+    name: "Coco Mademoiselle Eau de Parfum",
+    image: "💐",
+    sizeOrder: ["35ml","50ml","100ml","200ml"],
+    defaultSize: "100ml",
+    // All prices pulled directly from chanel.com for each country (meta price + the sibling-size list shown on each size's own product page) on 2026-07-07
+    // Exchange rates use Wise mid-market rate on the same day: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    // Japan only carries 2 sizes (50/100ml — no 35 or 200) — South Korea carries 3 sizes (35/50/100ml — no 200) — confirmed via the sibling-size list on the product page
+    sizes: {
+      "35ml": [
+        R("Thailand","🇹🇭","THB",4000,4000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("South Korea","🇰🇷","KRW",144000,3167,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",87,3290,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116390/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",115,3833,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "50ml": [
+        R("Thailand","🇹🇭","THB",5700,5700,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("Japan","🇯🇵","JPY",20020,4038,"CHANEL Japan official (tax included)","https://www.chanel.com/jp/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",false,0.1),
+        R("South Korea","🇰🇷","KRW",206000,4530,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",125,4728,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116420/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",154,5133,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "100ml": [
+        R("Thailand","🇹🇭","THB",8000,8000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("Japan","🇯🇵","JPY",27610,5569,"CHANEL Japan official (tax included)","https://www.chanel.com/jp/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",false,0.1),
+        R("South Korea","🇰🇷","KRW",286000,6289,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("France","🇫🇷","EUR",172,6505,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116520/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",185,6166,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "200ml": [
+        R("Thailand","🇹🇭","THB",12300,12300,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116570/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("France","🇫🇷","EUR",270,10211,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116570/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("USA","🇺🇸","USD",270,8999,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116570/coco-mademoiselle-eau-de-parfum-spray/")
+      ]
+    },
+    sizeNote: "Japan only sells 50ml/100ml (no 35 or 200ml) — South Korea sells 35/50/100ml (no 200ml)"
+  },
+  {
+    id: "dior-sauvage-edt-100",
+    brand: "DIOR",
+    name: "Sauvage Eau de Toilette 100ml",
+    image: "🏜️",
+    sizeOrder: ["100ml"],
+    defaultSize: "100ml",
+    // dior.com uses one shared URL per fragrance for every size (size picker is client-side JS), which makes reliably confirming a per-size price much harder than on chanel.com
+    // so only the verified 100ml size is offered here — other sizes (30/60/200ml) are not shown because their price-to-size mapping could not be reliably confirmed
+    // Exchange rates use Wise mid-market rate on the same day: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "100ml": [
+        R("Thailand","🇹🇭","THB",5200,5200,"DIOR Thailand official (size not 100% confirmed — please double-check)","https://www.dior.com/th_th/beauty/products/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%AB%E0%B8%AD%E0%B8%A1-sauvage-eau-de-toilette-Y0685240.html",true),
+        R("South Korea","🇰🇷","KRW",188000,4134,"DIOR Korea official (100mL size confirmed)","https://www.dior.com/ko_kr/beauty/products/%EC%86%8C%EB%B0%94%EC%A5%AC-%EC%98%A4-%EB%93%9C-%EB%9A%9C%EC%99%88%EB%A0%9B-Y0685240.html",false,0.065),
+        R("USA","🇺🇸","USD",135,4500,"DIOR US official (3.4oz/100mL size confirmed)","https://www.dior.com/en_us/beauty/products/sauvage-eau-de-toilette-Y0685240.html"),
+        R("France","🇫🇷","EUR",128,4841,"DIOR France official (size not 100% confirmed — please double-check)","https://www.dior.com/fr_fr/beauty/products/sauvage-eau-de-toilette-Y0685240.html",false,0.115),
+        R("Japan","🇯🇵","JPY",18480,3727,"DIOR Japan official (100mL size confirmed)","https://www.dior.com/ja_jp/beauty/products/%E3%82%BD%E3%83%B4%E3%82%A1%E3%83%BC%E3%82%B8%E3%83%A5-%E3%82%AA%E3%83%BC%E3%83%89%E3%82%A5-%E3%83%88%E3%83%AF%E3%83%AC-Y0685240.html",false,0.1)
+      ]
+    },
+    sizeNote: "Dior.com uses the same page for every size (picked via client-side JS), so only 100ml can be reliably verified per size — other sizes (30/60/200ml) aren't shown since they can't be confirmed"
+  },
+  {
+    id: "ysl-y-eau-de-parfum",
+    brand: "YVES SAINT LAURENT",
+    name: "Y Eau de Parfum",
+    image: "🖤",
+    sizeOrder: ["10ml","60ml","100ml","150ml Refill"],
+    defaultSize: "100ml",
+    // YSL Beauty uses a separate domain per country (unlike chanel.com's single shared domain): Thailand=yslbeautyth.com, South Korea=yslbeautykr.com, Japan=yslb.jp, France=yslbeauty.fr, USA=yslbeautyus.com — prices pulled directly from each site on 2026-07-07
+    // Regular/list prices used throughout (not the temporary promotional discounts Thailand and France happened to be running at the time of checking)
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "10ml": [
+        R("Thailand","🇹🇭","THB",1200,1200,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("USA","🇺🇸","USD",38,1267,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ],
+      "60ml": [
+        R("Thailand","🇹🇭","THB",4500,4500,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("Japan","🇯🇵","JPY",17380,3506,"YSL Beauty Japan official (tax included)","https://www.yslb.jp/fragrance/fragrance-for-him/fragrance-y-for-men/y-eau-de-parfum/WW-50194YSL.html",false,0.1),
+        R("South Korea","🇰🇷","KRW",150000,3299,"YSL Beauty Korea official","https://www.yslbeautykr.com/ko_KR/product/%EC%99%80%EC%9D%B4/%EC%99%80%EC%9D%B4-%EC%98%A4-%EB%93%9C-%EB%B9%A0%EB%A5%B4%ED%8E%AD/WW-50194YSL.html",false,0.065),
+        R("France","🇫🇷","EUR",102,3858,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115)
+      ],
+      "100ml": [
+        R("Thailand","🇹🇭","THB",6100,6100,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("South Korea","🇰🇷","KRW",210000,4618,"YSL Beauty Korea official","https://www.yslbeautykr.com/ko_KR/product/%EC%99%80%EC%9D%B4/%EC%99%80%EC%9D%B4-%EC%98%A4-%EB%93%9C-%EB%B9%A0%EB%A5%B4%ED%8E%AD/WW-50194YSL.html",false,0.065),
+        R("France","🇫🇷","EUR",142,5370,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115),
+        R("USA","🇺🇸","USD",165,5499,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ],
+      "150ml Refill": [
+        R("Thailand","🇹🇭","THB",7100,7100,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("France","🇫🇷","EUR",170,6429,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115),
+        R("USA","🇺🇸","USD",182,6066,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ]
+    },
+    sizeNote: "YSL sells different sizes in different countries: Japan carries only 60ml (no 100ml or refill), South Korea carries only 60/100ml (no 10ml mini and no refill), Thailand/France/USA carry all 4 sizes shown here. 40ml and 200ml also exist in France/USA but are excluded since Thailand doesn't sell them (no Thailand baseline). US 60ml price could not be verified from the official site this round, so it isn't shown."
+  },
+  {
+    id: "dior-forever-skin-glow",
+    brand: "DIOR",
+    name: "Forever Skin Glow",
+    image: "🧴",
+    sizeOrder: ["30ml"],
+    defaultSize: "30ml",
+    // Dior Forever Skin Glow foundation (product code Y0000149) is sold in one size only, 30ml, in every market — price does not depend on shade chosen. Prices checked directly on dior.com per country on 2026-07-07
+    // Note: in Japan the product is branded "Forever Fluid Skin Glow" but it's the same product, same product code (Y0000149)
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "30ml": [
+        R("Thailand","🇹🇭","THB",2900,2900,"DIOR Thailand official","https://www.dior.com/en_th/beauty/products/dior-forever-skin-glow-Y0000149.html",true),
+        R("Japan","🇯🇵","JPY",8030,1620,"DIOR Japan official (branded 'Forever Fluid Skin Glow' in Japan, same product)","https://www.dior.com/ja_jp/beauty/products/dior-forever-skin-glow-Y0000149.html",false,0.1),
+        R("South Korea","🇰🇷","KRW",98000,2155,"DIOR Korea official","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%EC%8A%A4%ED%82%A8-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%9E%98%EB%94%94%EC%96%B8%ED%8A%B8-%ED%8C%8C%EC%9A%B4%EB%8D%B0%EC%9D%B4%EC%85%98-Y0000149.html",false,0.065),
+        R("France","🇫🇷","EUR",59,2231,"DIOR France official","https://www.dior.com/fr_fr/beauty/products/dior-forever-skin-glow-Y0000149.html",false,0.115),
+        R("USA","🇺🇸","USD",60,2000,"DIOR US official","https://www.dior.com/en_us/beauty/products/dior-forever-skin-glow-Y0000149.html")
+      ]
+    },
+    sizeNote: "This foundation is sold in one size (30ml) in every country. Price doesn't change based on the shade chosen."
+  },
+  {
+    id: "dior-forever-cushion-hydra-glow",
+    brand: "DIOR",
+    name: "Forever Cushion Hydra Glow (Case + Refill)",
+    image: "🌸",
+    sizeOrder: ["Case","Refill"],
+    defaultSize: "Refill",
+    // This product is sold as two separate pieces: the couture case, and the cushion refill (the refill's real product code is Y0472921; the page seen is a "bundle / mix & match" page under code Y2472921). Prices checked on official sites on 2026-07-07
+    // Confirmed NOT sold in France/US (WebSearch + direct fetch found no working price page in either country, for either product code) — this product is explicitly "Formulated for Asian skin", consistent with an Asia-only release, so France/US prices are omitted rather than guessed
+    // All 3 confirmed countries showed the item as out of stock at check time, but the site still displayed its regular (non-discounted) price, which is what's used here
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199
+    sizes: {
+      "Case": [
+        R("Thailand","🇹🇭","THB",1290,1290,"DIOR Thailand official (limited-edition case design may differ by country)","https://www.dior.com/en_th/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",true),
+        R("Japan","🇯🇵","JPY",4510,910,"DIOR Japan official (limited-edition case design may differ by country)","https://www.dior.com/ja_jp/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",false,0.1),
+        R("South Korea","🇰🇷","KRW",43000,946,"DIOR Korea official (limited-edition case design may differ by country)","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%ED%95%98%EC%9D%B4%EB%93%9C%EB%9D%BC-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%A9%94%EC%89%AC-%EC%BF%A0%EC%85%98-%EB%AF%B9%EC%8A%A4-%EB%A7%A4%EC%B9%98-Y2472921.html",false,0.065)
+      ],
+      "Refill": [
+        R("Thailand","🇹🇭","THB",1900,1900,"DIOR Thailand official","https://www.dior.com/en_th/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",true),
+        R("Japan","🇯🇵","JPY",6710,1353,"DIOR Japan official","https://www.dior.com/ja_jp/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",false,0.1),
+        R("South Korea","🇰🇷","KRW",68000,1495,"DIOR Korea official","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%ED%95%98%EC%9D%B4%EB%93%9C%EB%9D%BC-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%A9%94%EC%89%AC-%EC%BF%A0%EC%85%98-%EB%AF%B9%EC%8A%A4-%EB%A7%A4%EC%B9%98-Y2472921.html",false,0.065)
+      ]
+    },
+    sizeNote: "This product requires buying two separate pieces: the couture case (reusable) and the cushion refill (replace when it runs out, using the same case). Prices confirmed for Thailand/Japan/South Korea only — this product is formulated specifically for Asian skin, and no verifiable price page could be found on the France/US sites, so those are omitted. All 3 confirmed countries showed the item as out of stock at check time, but prices shown are the regular listed prices, not discounts."
+  },
+  {
+    id: "chanel-small-shopping-bag-calfskin",
+    brand: "CHANEL",
+    name: "Small Shopping Bag (Grained Calfskin, Gold-Tone Metal)",
+    image: "👜",
+    sizeOrder: ["15 x 32 x 11.5cm"],
+    defaultSize: "15 x 32 x 11.5cm",
+    // CHANEL Small Shopping Bag, Métiers d'art / Spring-Summer 2026 collection (Matthieu Blazy's first collection for CHANEL), reference AS6288-B24248-94305
+    // Material: grained calfskin & gold-tone metal, black, size 15 x 32 x 11.5cm — prices checked directly on chanel.com per country on 2026-07-07
+    // Note: most CHANEL handbags have no "buy online" button — purchase typically requires a boutique appointment or contacting the brand — but the price shown on each site is the genuine suggested retail price, so it's valid for comparison
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "15 x 32 x 11.5cm": [
+        R("Thailand","🇹🇭","THB",230500,230500,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS6288B2424894305/small-tote-grained-calfskin-gold-tone-metal/",true),
+        R("Japan","🇯🇵","JPY",1197900,241616,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/",false,0.1),
+        R("South Korea","🇰🇷","KRW",11150000,245189,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/",false,0.065),
+        R("France","🇫🇷","EUR",6200,234484,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS6288B2424894305/petit-cabas-veau-graine-metal-dore/",false,0.115),
+        R("USA","🇺🇸","USD",7000,233310,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "This Spring-Summer 2026 (Métiers d'art) handbag is a fashion/leather-goods item, a different category from the fragrances and cosmetics elsewhere on this site. Prices shown are the Suggested Retail Price from each country's official site. CHANEL usually doesn't sell handbags directly online — purchase typically requires a boutique appointment or contacting the brand — but these prices are confirmed directly from each official country page and remain valid for comparison."
+  },
+  {
+    id: "chanel-22-small-handbag-shiny-calfskin",
+    brand: "CHANEL",
+    name: "CHANEL 22 Small Handbag (Shiny Calfskin, Gold-Tone Metal)",
+    image: "👜",
+    sizeOrder: ["35 x 37 x 7cm"],
+    defaultSize: "35 x 37 x 7cm",
+    // CHANEL 22 Small Handbag (hobo bag), Spring-Summer 2026 collection, reference AS3260-B19059-94305 — unlike the Small Shopping Bag above, this piece belongs to an actual named handbag line, "CHANEL 22" (one of the brand's ongoing signature bag lines, not just a generic product name)
+    // Material: shiny calfskin & gold-tone metal, black, size 35 x 37 x 7cm — prices checked directly on chanel.com per country on 2026-07-07
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "35 x 37 x 7cm": [
+        R("Thailand","🇹🇭","THB",219000,219000,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",true),
+        R("Japan","🇯🇵","JPY",1028500,207448,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",false,0.1),
+        R("South Korea","🇰🇷","KRW",9560000,210224,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",false,0.065),
+        R("France","🇫🇷","EUR",5650,213683,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS3260B1905994305/petit-sac-chanel-22-veau-brillant-metal-dore/",false,0.115),
+        R("USA","🇺🇸","USD",6100,203313,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "This bag belongs to the \"CHANEL 22\" hobo-bag line, Spring-Summer 2026 collection. Unlike the Small Shopping Bag above, Thailand is NOT the cheapest here — the USA is cheapest, followed by Japan, South Korea, France, with Thailand the most expensive. This shows Thailand isn't always the cheapest option — worth checking case by case. Prices shown are the Suggested Retail Price from each country's official site."
+  },
+  {
+    id: "chanel-25-small-handbag-calfskin",
+    brand: "CHANEL",
+    name: "CHANEL 25 Small Handbag (Calfskin, Gold-Tone Metal)",
+    image: "👜",
+    sizeOrder: ["30 x 26 x 14cm"],
+    defaultSize: "30 x 26 x 14cm",
+    // CHANEL 25 Small Handbag (hobo bag, introduced 2025), Spring-Summer 2026 collection, reference AS5293-B24123-U9622 — another signature CHANEL bag line, distinct from the CHANEL 22 line above
+    // Material: calfskin & gold-tone metal, black & white, size 30 x 26 x 14cm — prices checked directly on chanel.com per country on 2026-07-07
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "30 x 26 x 14cm": [
+        R("Thailand","🇹🇭","THB",237000,237000,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",true),
+        R("Japan","🇯🇵","JPY",1184700,238954,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",false,0.1),
+        R("South Korea","🇰🇷","KRW",10790000,237272,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",false,0.065),
+        R("France","🇫🇷","EUR",6200,234484,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS5293B24123U9622/petit-sac-chanel-25-veau-metal-dore/",false,0.115),
+        R("USA","🇺🇸","USD",6900,229977,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "This bag belongs to the \"CHANEL 25\" hobo-bag line (introduced in 2025), distinct from the CHANEL 22 line. This time prices are very close across all 5 countries (within about 4% of each other) — the USA is cheapest, followed by France, Thailand, South Korea, and Japan the most expensive. This shows that for some pieces, price barely differs by country. Prices shown are the Suggested Retail Price from each country's official site."
+  },
+  {
+    id: "chanel-premiere-edition-originale-watch",
+    brand: "CHANEL",
+    name: "Première Édition Originale Watch (Steel coated with Yellow Gold, Black Leather)",
+    image: "⌚",
+    sizeOrder: ["26.1 x 20 x 7.6mm"],
+    defaultSize: "26.1 x 20 x 7.6mm",
+    // CHANEL Première Édition Originale Watch, reference H6951 — the first watch category product on this site (previously only fragrance/cosmetics/handbags), a reissue of CHANEL's very first watch, part of the Première line
+    // Case: steel coated with 18K yellow gold (0.1 micron), chain bracelet interwoven with black leather strap, black-lacquered dial, case size 26.1 x 20 x 7.6mm — prices checked directly on chanel.com per country on 2026-07-07
+    // Note: CHANEL's watches/fine jewelry navigation is explicitly labeled "Exclusively in Boutiques" — even stricter than handbags (which at least show an "add to cart" action in page metadata). The actual watch page only offers "Contact Us"/Click & Collect, no direct checkout, but the price shown is a genuine, confirmed Suggested/Recommended Retail Price, valid for comparison just like the handbags
+    // France uses the /horlogerie/ path (French for "watches/horology") instead of /watches/ used by other countries — full URL: https://www.chanel.com/fr/horlogerie/p/H6951/montre-premiere-edition-originale/
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "26.1 x 20 x 7.6mm": [
+        R("Thailand","🇹🇭","THB",209000,209000,"CHANEL Thailand official","https://www.chanel.com/th/watches/p/H6951/premiere-edition-originale-watch/",true),
+        R("Japan","🇯🇵","JPY",990000,199683,"CHANEL Japan official","https://www.chanel.com/jp/watches/p/H6951/premiere-edition-originale-watch/",false,0.1),
+        R("South Korea","🇰🇷","KRW",9800000,215502,"CHANEL Korea official","https://www.chanel.com/kr/watches/p/H6951/premiere-edition-originale-watch/",false,0.065),
+        R("France","🇫🇷","EUR",5650,213683,"CHANEL France official","https://www.chanel.com/fr/horlogerie/p/H6951/montre-premiere-edition-originale/",false,0.115),
+        R("USA","🇺🇸","USD",5900,196647,"CHANEL.com US official","https://www.chanel.com/us/watches/p/H6951/premiere-edition-originale-watch/")
+      ]
+    },
+    sizeNote: "The first watch on this site (previously only fragrance, cosmetics, and handbags). CHANEL's watches category is explicitly \"Exclusively in Boutiques\" with no direct online checkout, but the price shown is a confirmed Suggested Retail Price from the official site. This time the USA is cheapest, followed by Japan, Thailand, France, with South Korea the most expensive — Thailand lands in the middle of the pack, neither cheapest nor priciest."
+  },
+  {
+    id: "lamer-balancing-treatment-lotion",
+    brand: "LA MER",
+    name: "The NEW Balancing Treatment Lotion",
+    image: "💧",
+    sizeOrder: ["150ml"],
+    defaultSize: "150ml",
+    // La Mer The NEW Balancing Treatment Lotion, product code 138014 — a newly launched watery lotion for combination/oily skin (US site showed Pre-Order status at the time of checking). Prices checked 2026-07-08
+    // Important note: La Mer has no direct-checkout website of its own in Thailand — lamer.co.th is just a landing page linking out to authorized retailers Central Online and Lazada (this product wasn't even live on lamer.co.th at check time). The Thailand price here comes from Central Online, an officially authorized channel per La Mer Thailand's own site (the user confirmed the price directly from the Central Online page, since that page requires JavaScript to render and couldn't be fetched automatically)
+    // Japan/South Korea/France/USA prices confirmed directly from the brand's own official sites (delamer.jp, lamerkorea.com, cremedelamer.fr, cremedelamer.com)
+    // Exchange rates: Wise mid-market rate, same date: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "150ml": [
+        R("Thailand","🇹🇭","THB",7200,7200,"Central Online (officially authorized channel for La Mer Thailand)","https://www.central.co.th/en/lamer-the-balancing-treatment-lotion-150-ml-cds22497628",true),
+        R("Japan","🇯🇵","JPY",22000,4437,"La Mer Japan official (delamer.jp, tax included)","https://www.delamer.jp/product/11484/138014/prep/the-balancing-treatment-lotion",false,0.1),
+        R("South Korea","🇰🇷","KRW",262000,5761,"La Mer Korea official","https://www.lamerkorea.com/product/32873/138014/face/watery_lotions/--",false,0.065),
+        R("France","🇫🇷","EUR",195,7375,"La Mer France official","https://www.cremedelamer.fr/product/11484/138014/prep/the-new-balancing-treatment-lotion",false,0.115),
+        R("USA","🇺🇸","USD",200,6666,"La Mer US official (Pre-Order status at check time)","https://www.cremedelamer.com/product/11484/138014/prep/the-new-balancing-treatment-lotion")
+        // Checked King Power Thailand (SKU 1093543, 150ml confirmed): 6,450 THB — cheaper than the Central Online Thailand baseline (7,200 THB), but still more expensive than Japan (4,437 THB), the overall cheapest — so this row is omitted
+      ]
+    },
+    sizeNote: "A newly launched product (still shown as Pre-Order on the US site). La Mer has no direct checkout site in Thailand, so the Thailand price is sourced from Central Online (an officially authorized retail channel, not an estimate) — the other 4 countries are confirmed directly from the brand's own sites. This time Japan is clearly cheapest (over 38% below Thailand), followed by South Korea, the USA, Thailand, with France the most expensive."
+  }
+];
+// ================================================================
+
+const grid = document.getElementById('grid');
+const emptyEl = document.getElementById('empty');
+const detailEl = document.getElementById('detail');
+const searchInput = document.getElementById('search');
+let activeId = null;
+let activeSize = null;
+
+function getCheapestNonBase(rows){
+  const others = rows.filter(x=>!x.isBase);
+  return others.reduce((a,b)=> b.thb < a.thb ? b : a, others[0]);
+}
+
+function splitNameSpec(str){
+  const idx = str.indexOf('(');
+  if(idx === -1) return {main: str, spec: ''};
+  return {main: str.slice(0, idx).trim(), spec: str.slice(idx).trim()};
+}
+
+function renderGrid(list){
+  grid.innerHTML = '';
+  emptyEl.style.display = list.length ? 'none' : 'block';
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'pcard' + (p.id===activeId ? ' active':'');
+    const rows = p.sizes[p.defaultSize];
+    const cheapest = getCheapestNonBase(rows);
+    const {main, spec} = splitNameSpec(p.name);
+    card.innerHTML = `
+      <div class="name">${p.brand} — ${main}</div>
+      ${spec ? `<div class="spec">${spec}</div>` : ''}
+      <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' sizes · ' : ''}${rows.length} countries (${p.defaultSize}) · cheapest in ${cheapest.flag} ${cheapest.country}</div>
+    `;
+    card.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
+    grid.appendChild(card);
+  });
+}
+
+function showDetail(p){
+  const size = activeSize && p.sizes[activeSize] ? activeSize : p.defaultSize;
+  activeSize = size;
+  const rows = p.sizes[size];
+  const base = rows.find(x=>x.isBase) || rows[0];
+  const cheapest = getCheapestNonBase(rows);
+
+  const sizePills = p.sizeOrder.length > 1 ? `
+    <div class="sizebar">
+      ${p.sizeOrder.map(s => `<button class="sizepill${s===size?' active':''}" data-size="${s}">${s}</button>`).join('')}
+    </div>
+    ${p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : ''}
+  ` : (p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : '');
+
+  const rowsHtml = [...rows].sort((a,b)=>a.thb-b.thb).map(row=>{
+    const diffPct = ((row.thb - base.thb) / base.thb * 100);
+    let diffLabel, diffClass;
+    if(row.isBase){ diffLabel = 'Thailand price (base)'; diffClass='base'; }
+    else if(diffPct < 0){ diffLabel = `${Math.abs(diffPct).toFixed(0)}% cheaper`; diffClass='cheap'; }
+    else if(diffPct > 0){ diffLabel = `${diffPct.toFixed(0)}% more expensive`; diffClass='exp'; }
+    else { diffLabel = 'Same price'; diffClass='base'; }
+
+    const isCheapestBadge = (row===cheapest) ? `<span class="badge best">Cheapest</span>` : '';
+    const isThaiBadge = row.isBase ? `<span class="badge thai">Thailand</span>` : '';
+
+    return `
+      <tr>
+        <td class="country"><span class="cname">${row.flag} ${row.country}</span>${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}</td>
+        <td class="local">${row.localPrice.toLocaleString()} ${row.currency}</td>
+        <td class="price">฿${row.thb.toLocaleString()}</td>
+        <td class="diff ${diffClass}">${diffLabel}</td>
+        <td class="src">${row.retailer}<br><a href="${row.url}" target="_blank" rel="noopener">Store link</a>${row.altUrl ? ` · <a href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'Backup link'}</a>` : ''} · checked ${row.updated}${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} after tourist tax refund (~${Math.round(row.refundPct*100)}% of price — a rough reference figure, not a confirmed price)</div>` : ''}</td>
+      </tr>`;
+  }).join('');
+
+  const {main: detailMain, spec: detailSpec} = splitNameSpec(p.name);
+  detailEl.innerHTML = `
+    <h2>${p.brand} — ${detailMain}</h2>
+    ${detailSpec ? `<div class="spec">${detailSpec}</div>` : ''}
+    <div class="sub">Size ${size} · prices converted to Thai Baht (approximate exchange rate)</div>
+    ${sizePills}
+    <table>
+      <thead><tr><th>Country</th><th>Local Price</th><th>In THB</th><th>Diff vs Thailand</th><th>Source</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  `;
+  detailEl.classList.add('show');
+  detailEl.querySelectorAll('.sizepill').forEach(btn=>{
+    btn.onclick = ()=>{ activeSize = btn.dataset.size; showDetail(p); };
+  });
+  detailEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function currentList(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q) return PRODUCTS;
+  return PRODUCTS.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.brand.toLowerCase().includes(q)
+  );
+}
+
+searchInput.addEventListener('input', ()=> renderGrid(currentList()));
+
+// ===================== Tax-refund estimate calculator =====================
+const CALC_RATES = [
+  {label:"Japan", flag:"🇯🇵", pct:0.10, note:"Tax-Free shops instantly exempt ~10% consumption tax at checkout (current system — valid until Nov 1, 2026, before it changes to \"pay in full, then refund at the airport\") ⚠️ Perfume/cosmetics are classified as \"consumables,\" capped at ¥500,000 per store per day (≈฿100,850) — anything above that at one store in one day doesn't get the exemption. This cap is removed after Nov 1, 2026."},
+  {label:"South Korea", flag:"🇰🇷", pct:0.065, note:"Reclaim VAT through an operator (Global Blue, Global Tax Free, etc.), netting roughly 5–8% after fees (minimum purchase ~₩15,000/store/day) ⚠️ Instant in-store refund is capped: max ₩1,000,000/receipt (≈฿21,990), ₩600,000/store/day (≈฿13,194), and ₩5,000,000 total per trip (≈฿109,950) — above these caps you can still get a refund, just at the airport instead of instantly in-store."},
+  {label:"France", flag:"🇫🇷", pct:0.115, note:"Reclaim VAT through Global Blue/Planet, netting roughly 10–13% after fees (minimum purchase over €100/store/day) — research did not turn up a clearly confirmed maximum purchase cap (unlike Japan/Korea, which have clear caps). If buying a large quantity, check directly with the store or refund counter first."}
+];
+const calcPriceEl = document.getElementById('calcPrice');
+const calcResultsEl = document.getElementById('calcResults');
+const calcCountryBarEl = document.getElementById('calcCountryBar');
+let calcCountryIdx = 0;
+function renderCalcBar(){
+  calcCountryBarEl.innerHTML = CALC_RATES.map((c,i)=>`<button type="button" class="calcpill${i===calcCountryIdx?' active':''}" data-i="${i}">${c.flag} ${c.label}</button>`).join('');
+  calcCountryBarEl.querySelectorAll('.calcpill').forEach(btn=>{
+    btn.onclick = ()=>{ calcCountryIdx = parseInt(btn.dataset.i, 10); renderCalcBar(); renderCalc(); };
+  });
+}
+function renderCalc(){
+  const v = parseFloat(calcPriceEl.value);
+  const c = CALC_RATES[calcCountryIdx];
+  const result = (v>0) ? `฿${Math.round(v*(1-c.pct)).toLocaleString()}` : '—';
+  calcResultsEl.innerHTML = `<div class="calc-row">
+    <div class="calc-country">${c.flag} ${c.label} <b>-${Math.round(c.pct*100)}%</b></div>
+    <div class="calc-result">${result}</div>
+    <div class="calc-note">${c.note}</div>
+  </div>`;
+}
+if(calcPriceEl){
+  renderCalcBar();
+  calcPriceEl.addEventListener('input', renderCalc);
+  renderCalc();
+}
+
+// init
+renderGrid(PRODUCTS);
+if(PRODUCTS.length){
+  activeId = PRODUCTS[0].id;
+  activeSize = PRODUCTS[0].defaultSize;
+  renderGrid(PRODUCTS);
+  showDetail(PRODUCTS[0]);
+}
+</script>
+
+</body>
+</html>

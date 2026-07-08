@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เทียบราคาสินค้าทั่วโลก | รับหิ้วคุ้มไหม</title>
+<style>
+  :root{
+    --bg:#faf7f2; --ink:#1f1b16; --sub:#6b6258; --line:#e7e0d6;
+    --accent:#b7472a; --accent2:#0e6b5a; --card:#ffffff; --best:#0e6b5a; --worst:#b7472a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Sarabun","Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink);}
+  header{position:relative;padding:36px 20px 20px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf9,var(--bg));}
+  header h1{margin:0 0 6px;font-size:28px;letter-spacing:.3px;}
+  header p{margin:0;color:var(--sub);font-size:14.5px;}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 18px 60px;}
+  .searchbar{display:flex;gap:8px;margin:22px 0 8px;position:relative;}
+  .searchbar input{flex:1;padding:14px 16px;border-radius:12px;border:1px solid var(--line);font-size:16px;background:var(--card);}
+  .searchbar input:focus{outline:2px solid var(--accent2);}
+  .hint{color:var(--sub);font-size:13px;margin:0 0 18px 2px;}
+  .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:10px;}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;text-align:left;}
+  .pcard:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .pcard.active{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2) inset;}
+  .pcard .brand{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;}
+  .pcard .name{font-weight:600;margin:4px 0 2px;font-size:15.5px;}
+  .pcard .spec{font-size:12px;color:var(--sub);font-weight:400;margin:0 0 6px;}
+  .pcard .meta{font-size:12.5px;color:var(--sub);}
+  .empty{padding:40px 10px;text-align:center;color:var(--sub);}
+
+  @media (min-width:860px){
+    .layout{grid-template-columns:280px 1fr;gap:22px;}
+    .sidebar{max-height:calc(100vh - 32px);overflow-y:auto;position:sticky;top:16px;padding-right:4px;}
+    .grid{grid-template-columns:1fr;}
+    .maincol{position:sticky;top:16px;}
+  }
+
+  .detail{margin-top:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:none;}
+  .detail.show{display:block;}
+  .detail h2{margin:0 0 2px;font-size:20px;}
+  .detail .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px;}
+  .detail .spec{color:var(--sub);font-size:13.5px;font-weight:400;margin:2px 0 4px;}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;}
+  th{color:var(--sub);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;}
+  td.country{white-space:nowrap;}
+  td.country .cname{white-space:nowrap;}
+  td.country .badges{margin-top:4px;white-space:normal;}
+  td.price{font-weight:600;white-space:nowrap;}
+  td.local{color:var(--sub);font-size:13px;white-space:nowrap;}
+  .diff{font-weight:600;white-space:nowrap;}
+  .diff.cheap{color:var(--best);}
+  .diff.exp{color:var(--worst);}
+  .diff.base{color:var(--sub);}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px 4px 0 0;font-weight:600;}
+  .badge.best{background:#e4f3ef;color:var(--best);}
+  .badge.thai{background:#f1eee8;color:var(--sub);}
+  .src{font-size:11.5px;color:#9c9284;}
+  .src a{color:#9c9284;}
+  .refund{margin-top:3px;font-style:italic;color:#7a5a33;}
+  .note{margin:0 auto;max-width:1064px;padding:12px 14px;background:#fdf4ec;border:1px solid #f1ddc7;border-radius:10px;font-size:12.5px;color:#7a5a33;line-height:1.6;text-align:left;}
+  .calc{margin-top:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;}
+  .calc h3{margin:0 0 6px;font-size:16.5px;}
+  .calc-hint{margin:0 0 12px;color:var(--sub);font-size:13px;line-height:1.5;}
+  .calc-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .calc-countrybar{display:flex;flex-wrap:wrap;gap:8px;}
+  .calcpill{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .calcpill:hover{border-color:var(--accent2);}
+  .calcpill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .calc input{width:100%;max-width:200px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff;}
+  .calc input:focus{outline:2px solid var(--accent2);}
+  .calc-grid{margin-top:14px;display:grid;gap:10px;}
+  .calc-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--line);}
+  .calc-country{font-weight:600;font-size:14px;}
+  .calc-country b{color:var(--accent);font-weight:700;}
+  .calc-result{font-weight:700;font-size:16px;color:var(--best);text-align:right;}
+  .calc-note{grid-column:1/-1;font-size:12px;color:var(--sub);line-height:1.5;}
+  .calc-static{margin-top:10px;font-size:12.5px;color:var(--sub);line-height:1.6;}
+  footer{text-align:center;color:var(--sub);font-size:12.5px;padding:24px 18px;border-top:1px solid var(--line);}
+  .sizebar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
+  .sizepill{padding:7px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);}
+  .sizepill:hover{border-color:var(--accent2);}
+  .sizepill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .sizenote{font-size:12px;color:var(--sub);margin:2px 0 14px;}
+  @media (max-width:560px){
+    table, thead, tbody, th, td, tr{display:block;}
+    thead{display:none;}
+    tr{border-bottom:1px solid var(--line);padding:10px 0;}
+    td{border:none;padding:3px 2px;}
+    td.country{font-weight:700;font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 เทียบราคาสินค้าทั่วโลก</h1>
+  <p>เช็กก่อนหิ้ว — ราคาจากเว็บ official แต่ละประเทศ เทียบเป็นเงินบาท</p>
+</header>
+
+<div class="wrap">
+
+  <div class="searchbar">
+    <input id="search" type="text" placeholder="ค้นหาสินค้า เช่น Chanel Chance, น้ำหอม, ยี่ห้อ..." autocomplete="off">
+  </div>
+  <p class="hint">พิมพ์ชื่อสินค้าหรือแบรนด์เพื่อค้นหา (เช่น "chanel", "dior", "sauvage", "ysl", "cushion", "bag", "watch", "la mer")</p>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" style="display:none;">ไม่พบสินค้าที่ค้นหา ลองพิมพ์คำอื่นดูนะ</div>
+    </div>
+    <div class="maincol">
+      <div class="detail" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="calc">
+    <h3>🧮 คำนวณราคาโดยประมาณหลังคืนภาษีนักท่องเที่ยว</h3>
+    <p class="calc-hint">เลือกประเทศของราคาที่คุณเห็นในตาราง แล้วกรอกราคานั้น (แปลงเป็นบาทแล้ว) — ระบบจะคำนวณราคาโดยประมาณหลังขอคืนภาษีให้เฉพาะประเทศนั้นๆ</p>
+    <div class="calc-controls">
+      <div class="calc-countrybar" id="calcCountryBar"></div>
+      <input id="calcPrice" type="number" min="0" placeholder="เช่น 5569 (บาท)">
+    </div>
+    <div class="calc-grid" id="calcResults"></div>
+    <div class="calc-static">🇺🇸 สหรัฐอเมริกา — ราคาที่แสดงไม่รวมภาษีขายอยู่แล้ว (บวกเพิ่มตอน checkout ตามรัฐปลายทาง) จึงไม่ต้องคำนวณเพิ่ม · 🇹🇭 ไทย — ใช้เป็นราคาฐานสำหรับผู้ซื้อชาวไทย ไม่ต้องปรับ</div>
+  </div>
+</div>
+
+<footer>
+  <div class="note">
+    ✅ <b>ที่มาราคา:</b> ทุกราคาในตารางนี้ดึงตรงจากหน้าสินค้าจริงบนเว็บ official ของแต่ละแบรนด์ในแต่ละประเทศ (chanel.com / dior.com เวอร์ชันประเทศนั้นๆ) ไม่ใช่ราคาประมาณจากร้านอื่น ส่วนอัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ในวันที่เช็กราคา (ระบุไว้ในโค้ดข้อมูลแต่ละสินค้า) — ราคาจริงอาจขยับได้ทุกวัน แนะนำเช็กซ้ำหน้างานก่อนรับหิ้วจริง และตัวเลขนี้ยังไม่รวมค่าส่ง/ภาษีนำเข้า<br><br>
+    🔗 <b>เรื่องลิงก์ร้าน:</b> ลิงก์ chanel.com (โดเมนกลาง) จะ redirect ตามพิกัด IP ผู้เข้าดูอัตโนมัติ ไม่ว่าจะพิมพ์ /jp/ /us/ /kr/ /fr/ ต่อท้ายหรือไม่ก็ตาม — ถ้าเปิดจากไทยจะโดนเด้งไปหน้าไทยเสมอ (แต่ตัวเลขราคาที่ใช้ยังยืนยันตรงจากหน้านั้นแล้ว เพียงแต่ลิงก์คลิกจะเด้ง) บางแถวเลยมีลิงก์สำรองที่เป็นโดเมนเฉพาะประเทศกำกับไว้ให้กดดูได้โดยไม่เด้ง ส่วนลิงก์ dior.com ไม่เด้งประเทศ กดดูได้ตรงๆ<br><br>
+    ⏱️ <b>เรื่อง "ราคาเรียลไทม์":</b> หน้านี้เป็นไฟล์ HTML ล้วนๆ เปิดจากเครื่องได้เลยไม่ต้องมีเซิร์ฟเวอร์ จึงไม่สามารถดึงราคาสดจากเว็บ chanel.com/dior.com ตอนกดค้นหาได้จริง (เว็บพวกนี้บล็อกการดึงข้อมูลข้ามโดเมนจากเบราว์เซอร์ + กันบอท) วิธีที่ทำได้จริงคือ: เวลาต้องการราคาล่าสุด ให้กลับมาทักแชทนี้บอกให้ "เช็กราคาล่าสุด" Claude จะไปดึงราคาจริงจากเว็บ official แต่ละประเทศให้ใหม่ แล้วอัปเดตไฟล์นี้ให้
+  </div>
+  <p style="margin:14px 0 0;">อัตราแลกเปลี่ยนโดยประมาณ ณ ก.ค. 2026 · ทำเพื่อการเปรียบเทียบเบื้องต้นเท่านั้น</p>
+</footer>
+
+<script>
+// ===================== PRODUCT DATABASE =====================
+// เพิ่มสินค้าใหม่ได้โดยเพิ่ม object ใน array นี้ — โครงสร้างเดียวกันหมด
+function R(country,flag,currency,localPrice,thb,retailer,url,isBase,refundPct){
+  const o = {country,flag,currency,localPrice,thb,retailer,url,updated:"2026-07-07"};
+  if(isBase) o.isBase = true;
+  if(refundPct) o.refundPct = refundPct; // อัตราคืนภาษีนักท่องเที่ยวโดยประมาณ (net หลังหักค่าธรรมเนียม) — ใช้แสดงราคาประมาณหลังคืนภาษีเท่านั้น ไม่ใช้ในการตัดสิน "ถูกที่สุด"
+  return o;
+}
+const PRODUCTS = [
+  {
+    id: "chanel-chance-eau-tendre-edp",
+    brand: "CHANEL",
+    name: "Chance Eau Tendre Eau de Parfum",
+    nameTh: "ชานส์ โอ ตองเดรอ โอ เดอ ปาร์ฟูม",
+    image: "🌸",
+    sizeOrder: ["35ml","50ml","100ml","150ml"],
+    defaultSize: "100ml",
+    // ทุกราคาดึงตรงจาก chanel.com ของแต่ละประเทศ (meta price + sibling-size list ในหน้าสินค้าจริง แต่ละไซส์แยกหน้ากัน) เมื่อ 2026-07-07
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    // ญี่ปุ่นและเกาหลีใต้ไม่มีไซส์ 150ml วางขาย (ยืนยันจาก sibling-size list บนหน้าเว็บที่แสดงแค่ 3 ไซส์)
+    sizes: {
+      "35ml": [
+        R("ไทย","🇹🇭","THB",4000,4000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",13310,2685,"CHANEL Japan official (ราคารวมภาษี)","https://www.chanel.com/jp/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",144000,3167,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",87,3290,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126240/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",115,3833,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126240/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "50ml": [
+        R("ไทย","🇹🇭","THB",5700,5700,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",20020,4038,"CHANEL Japan official (ราคารวมภาษี)","https://www.chanel.com/jp/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",206000,4530,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",125,4728,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126250/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",154,5133,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126250/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "100ml": [
+        R("ไทย","🇹🇭","THB",8000,8000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",27610,5569,"CHANEL Japan official (ราคารวมภาษี)","https://www.chanel.com/jp/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",286000,6289,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",172,6505,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126260/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",185,6166,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126260/chance-eau-tendre-eau-de-parfum-spray/")
+      ],
+      "150ml": [
+        R("ไทย","🇹🇭","THB",9450,9450,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/126270/chance-eau-tendre-eau-de-parfum-spray/",true),
+        R("ฝรั่งเศส","🇫🇷","EUR",207,7829,"CHANEL France official","https://www.chanel.com/fr/parfums/p/126270/chance-eau-tendre-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",227,7566,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/126270/chance-eau-tendre-eau-de-parfum-spray/")
+      ]
+    },
+    sizeNote: "ญี่ปุ่นและเกาหลีใต้ไม่มีไซส์ 150ml วางขาย (มีแค่ 35/50/100ml)"
+  },
+  {
+    id: "chanel-coco-mademoiselle-edp",
+    brand: "CHANEL",
+    name: "Coco Mademoiselle Eau de Parfum",
+    nameTh: "โกโก้ มาดมัวแซล โอ เดอ ปาร์ฟูม",
+    image: "💐",
+    sizeOrder: ["35ml","50ml","100ml","200ml"],
+    defaultSize: "100ml",
+    // ทุกราคาดึงตรงจาก chanel.com ของแต่ละประเทศ (meta price + sibling-size list ในหน้าสินค้าจริง แต่ละไซส์แยกหน้ากัน) เมื่อ 2026-07-07
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    // ญี่ปุ่นมีแค่ 2 ไซส์ (50/100ml เท่านั้น ไม่มี 35/200) — เกาหลีใต้มี 3 ไซส์ (35/50/100ml ไม่มี 200ml) — ยืนยันจาก sibling-size list บนหน้าเว็บ
+    sizes: {
+      "35ml": [
+        R("ไทย","🇹🇭","THB",4000,4000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("เกาหลีใต้","🇰🇷","KRW",144000,3167,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",87,3290,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116390/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",115,3833,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116390/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "50ml": [
+        R("ไทย","🇹🇭","THB",5700,5700,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",20020,4038,"CHANEL Japan official (ราคารวมภาษี)","https://www.chanel.com/jp/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",206000,4530,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",125,4728,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116420/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",154,5133,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116420/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "100ml": [
+        R("ไทย","🇹🇭","THB",8000,8000,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",27610,5569,"CHANEL Japan official (ราคารวมภาษี)","https://www.chanel.com/jp/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",286000,6289,"CHANEL Korea official","https://www.chanel.com/kr/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",172,6505,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116520/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",185,6166,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116520/coco-mademoiselle-eau-de-parfum-spray/")
+      ],
+      "200ml": [
+        R("ไทย","🇹🇭","THB",12300,12300,"CHANEL Thailand official","https://www.chanel.com/th/fragrance/p/116570/coco-mademoiselle-eau-de-parfum-spray/",true),
+        R("ฝรั่งเศส","🇫🇷","EUR",270,10211,"CHANEL France official","https://www.chanel.com/fr/parfums/p/116570/coco-mademoiselle-eau-de-parfum-vaporisateur/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",270,8999,"CHANEL.com US official","https://www.chanel.com/us/fragrance/p/116570/coco-mademoiselle-eau-de-parfum-spray/")
+      ]
+    },
+    sizeNote: "ญี่ปุ่นวางขายแค่ 50ml/100ml (ไม่มี 35/200ml) — เกาหลีใต้วางขาย 35/50/100ml (ไม่มี 200ml)"
+  },
+  {
+    id: "dior-sauvage-edt-100",
+    brand: "DIOR",
+    name: "Sauvage Eau de Toilette 100ml",
+    nameTh: "โซวาจ โอ เดอ ตัวเลตต์ 100มล.",
+    image: "🏜️",
+    sizeOrder: ["100ml"],
+    defaultSize: "100ml",
+    // dior.com ใช้ URL เดียวกันทุกไซส์ (ตัวเลือกไซส์เป็น JS ฝั่ง client) ทำให้ดึงราคาแยกตามไซส์แบบยืนยันได้ไม่น่าเชื่อถือเท่า chanel.com
+    // จึงเสนอเฉพาะไซส์ 100ml ที่ยืนยันได้เท่านั้น ไม่แสดงไซส์อื่น (30/60/200ml) เพราะยังหาวิธียืนยันขนาดที่แม่นยำไม่ได้
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "100ml": [
+        R("ไทย","🇹🇭","THB",5200,5200,"DIOR Thailand official (ขนาดยังไม่ยืนยัน 100% — โปรดเช็กซ้ำ)","https://www.dior.com/th_th/beauty/products/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%AB%E0%B8%AD%E0%B8%A1-sauvage-eau-de-toilette-Y0685240.html",true),
+        R("เกาหลีใต้","🇰🇷","KRW",188000,4134,"DIOR Korea official (ยืนยันขนาด 100mL แล้ว)","https://www.dior.com/ko_kr/beauty/products/%EC%86%8C%EB%B0%94%EC%A5%AC-%EC%98%A4-%EB%93%9C-%EB%9A%9C%EC%99%88%EB%A0%9B-Y0685240.html",false,0.065),
+        R("สหรัฐอเมริกา","🇺🇸","USD",135,4500,"DIOR US official (ยืนยันขนาด 3.4oz/100mL แล้ว)","https://www.dior.com/en_us/beauty/products/sauvage-eau-de-toilette-Y0685240.html"),
+        R("ฝรั่งเศส","🇫🇷","EUR",128,4841,"DIOR France official (ขนาดยังไม่ยืนยัน 100% — โปรดเช็กซ้ำ)","https://www.dior.com/fr_fr/beauty/products/sauvage-eau-de-toilette-Y0685240.html",false,0.115),
+        R("ญี่ปุ่น","🇯🇵","JPY",18480,3727,"DIOR Japan official (ยืนยันขนาด 100mL แล้ว)","https://www.dior.com/ja_jp/beauty/products/%E3%82%BD%E3%83%B4%E3%82%A1%E3%83%BC%E3%82%B8%E3%83%A5-%E3%82%AA%E3%83%BC%E3%83%89%E3%82%A5-%E3%83%88%E3%83%AF%E3%83%AC-Y0685240.html",false,0.1)
+      ]
+    },
+    sizeNote: "Dior.com ใช้หน้าเดียวกันทุกไซส์ (เลือกไซส์ด้วย JS) จึงยืนยันราคาต่อไซส์แบบแม่นยำได้เฉพาะ 100ml เท่านั้น — ไซส์อื่น (30/60/200ml) ยังไม่แสดงเพราะยืนยันไม่ได้"
+  },
+  {
+    id: "ysl-y-eau-de-parfum",
+    brand: "YVES SAINT LAURENT",
+    name: "Y Eau de Parfum",
+    nameTh: "วาย โอ เดอ ปาร์ฟูม (Y EDP)",
+    image: "🖤",
+    sizeOrder: ["10ml","60ml","100ml","150ml Refill"],
+    defaultSize: "100ml",
+    // YSL Beauty ใช้คนละโดเมนต่อประเทศ (ไม่เหมือน chanel.com ที่ใช้โดเมนกลาง): ไทย=yslbeautyth.com, เกาหลีใต้=yslbeautykr.com, ญี่ปุ่น=yslb.jp, ฝรั่งเศส=yslbeauty.fr, สหรัฐฯ=yslbeautyus.com — ราคาดึงตรงจากแต่ละเว็บเมื่อ 2026-07-07
+    // ใช้ราคาปกติ (ราคาก่อนหักโปรโมชั่นลดราคาชั่วคราวที่ไทยกับฝรั่งเศสกำลังจัดอยู่พอดีช่วงที่เช็ก ไม่ใช่ราคาลดพิเศษวันนั้น)
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "10ml": [
+        R("ไทย","🇹🇭","THB",1200,1200,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("สหรัฐอเมริกา","🇺🇸","USD",38,1267,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ],
+      "60ml": [
+        R("ไทย","🇹🇭","THB",4500,4500,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",17380,3506,"YSL Beauty Japan official (ราคารวมภาษี)","https://www.yslb.jp/fragrance/fragrance-for-him/fragrance-y-for-men/y-eau-de-parfum/WW-50194YSL.html",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",150000,3299,"YSL Beauty Korea official","https://www.yslbeautykr.com/ko_KR/product/%EC%99%80%EC%9D%B4/%EC%99%80%EC%9D%B4-%EC%98%A4-%EB%93%9C-%EB%B9%A0%EB%A5%B4%ED%8E%AD/WW-50194YSL.html",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",102,3858,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115)
+      ],
+      "100ml": [
+        R("ไทย","🇹🇭","THB",6100,6100,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("เกาหลีใต้","🇰🇷","KRW",210000,4618,"YSL Beauty Korea official","https://www.yslbeautykr.com/ko_KR/product/%EC%99%80%EC%9D%B4/%EC%99%80%EC%9D%B4-%EC%98%A4-%EB%93%9C-%EB%B9%A0%EB%A5%B4%ED%8E%AD/WW-50194YSL.html",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",142,5370,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",165,5499,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ],
+      "150ml Refill": [
+        R("ไทย","🇹🇭","THB",7100,7100,"YSL Beauty Thailand official","https://www.yslbeautyth.com/en_TH/personalization/y-eau-de-parfum/WW-50194YSL.html",true),
+        R("ฝรั่งเศส","🇫🇷","EUR",170,6429,"YSL Beauty France official","https://www.yslbeauty.fr/parfums/parfum-homme/y/y-eau-de-parfum/WW-50194YSL.html",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",182,6066,"YSL Beauty US official","https://www.yslbeautyus.com/fragrance/mens-fragrances/y/y-eau-de-parfum/727YSL.html")
+      ]
+    },
+    sizeNote: "YSL ขายไซส์ไม่เหมือนกันในแต่ละประเทศ: ญี่ปุ่นมีแค่ 60ml ไซส์เดียว (ไม่มี 100ml หรือรีฟิล), เกาหลีใต้มีแค่ 60/100ml (ไม่มีมินิ 10ml และไม่มีรีฟิล), ไทย/ฝรั่งเศส/สหรัฐฯ มีครบทั้ง 4 ไซส์นี้ — ส่วนไซส์ 40ml และ 200ml มีขายที่ฝรั่งเศสกับสหรัฐฯ แต่ไทยไม่มีขาย จึงไม่ใส่ในตารางเปรียบเทียบ (ไม่มีราคาไทยเป็นฐาน) ราคาสหรัฐฯ ไซส์ 60ml ตรวจสอบจากเว็บทางการไม่สำเร็จในรอบนี้จึงไม่แสดง"
+  },
+  {
+    id: "dior-forever-skin-glow",
+    brand: "DIOR",
+    name: "Forever Skin Glow",
+    nameTh: "รองพื้น Dior Forever Skin Glow",
+    image: "🧴",
+    sizeOrder: ["30ml"],
+    defaultSize: "30ml",
+    // รองพื้น Dior Forever Skin Glow (รหัสสินค้า Y0000149) มีขายไซส์เดียวคือ 30ml ทุกประเทศ ราคาไม่ขึ้นกับเฉดสีที่เลือก — เช็กราคาตรงจาก dior.com แต่ละประเทศเมื่อ 2026-07-07
+    // หมายเหตุ: ที่ญี่ปุ่นตั้งชื่อสินค้าว่า "Forever Fluid Skin Glow" แต่เป็นสินค้าตัวเดียวกัน รหัสสินค้าเดียวกัน (Y0000149)
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "30ml": [
+        R("ไทย","🇹🇭","THB",2900,2900,"DIOR Thailand official","https://www.dior.com/en_th/beauty/products/dior-forever-skin-glow-Y0000149.html",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",8030,1620,"DIOR Japan official (ชื่อสินค้าที่ญี่ปุ่น: Forever Fluid Skin Glow แต่รหัสสินค้าเดียวกัน)","https://www.dior.com/ja_jp/beauty/products/dior-forever-skin-glow-Y0000149.html",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",98000,2155,"DIOR Korea official","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%EC%8A%A4%ED%82%A8-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%9E%98%EB%94%94%EC%96%B8%ED%8A%B8-%ED%8C%8C%EC%9A%B4%EB%8D%B0%EC%9D%B4%EC%85%98-Y0000149.html",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",59,2231,"DIOR France official","https://www.dior.com/fr_fr/beauty/products/dior-forever-skin-glow-Y0000149.html",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",60,2000,"DIOR US official","https://www.dior.com/en_us/beauty/products/dior-forever-skin-glow-Y0000149.html")
+      ]
+    },
+    sizeNote: "รองพื้นตัวนี้มีขายไซส์เดียว (30ml) เหมือนกันทุกประเทศ ราคาไม่เปลี่ยนตามเฉดสีที่เลือก"
+  },
+  {
+    id: "dior-forever-cushion-hydra-glow",
+    brand: "DIOR",
+    name: "Forever Cushion Hydra Glow",
+    nameTh: "คุชชั่น Dior Forever Hydra Glow (ตลับ+รีฟิล)",
+    image: "🌸",
+    sizeOrder: ["ตลับ (Case)","รีฟิล (Refill)"],
+    defaultSize: "รีฟิล (Refill)",
+    // สินค้านี้แยกขาย 2 ชิ้น: ตลับเคส กับ รีฟิลคุชชั่น (รหัสรีฟิลจริง Y0472921 ส่วนหน้าเว็บที่เห็นเป็นหน้า "bundle/mix & match" รหัส Y2472921) เช็กราคาจากเว็บทางการเมื่อ 2026-07-07
+    // เช็กแล้วว่าไม่มีขายที่ฝรั่งเศส/สหรัฐฯ (WebSearch + fetch ตรงไม่พบหน้าราคาจริงทั้ง 2 ประเทศ ทั้งสองรหัสสินค้า) — สินค้านี้ทำมาเพื่อผิวคนเอเชียโดยเฉพาะ ("Formulated for Asian skin") จึงน่าจะขายเฉพาะเอเชีย ไม่ใส่ราคาฝรั่งเศส/สหรัฐฯ เพราะยืนยันไม่ได้
+    // ราคาที่เช็กตอนนี้สินค้า "หมดสต็อก" ทั้ง 3 ประเทศ แต่เว็บยังโชว์ราคาปกติอยู่ ใช้ราคานั้นได้ (ราคาไม่ใช่ราคาลด)
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199
+    sizes: {
+      "ตลับ (Case)": [
+        R("ไทย","🇹🇭","THB",1290,1290,"DIOR Thailand official (ลายเคสรุ่นลิมิเต็ด อาจต่างจากประเทศอื่น)","https://www.dior.com/en_th/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",4510,910,"DIOR Japan official (ลายเคสรุ่นลิมิเต็ด อาจต่างจากประเทศอื่น)","https://www.dior.com/ja_jp/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",43000,946,"DIOR Korea official (ลายเคสรุ่นลิมิเต็ด อาจต่างจากประเทศอื่น)","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%ED%95%98%EC%9D%B4%EB%93%9C%EB%9D%BC-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%A9%94%EC%89%AC-%EC%BF%A0%EC%85%98-%EB%AF%B9%EC%8A%A4-%EB%A7%A4%EC%B9%98-Y2472921.html",false,0.065)
+      ],
+      "รีฟิล (Refill)": [
+        R("ไทย","🇹🇭","THB",1900,1900,"DIOR Thailand official","https://www.dior.com/en_th/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",6710,1353,"DIOR Japan official","https://www.dior.com/ja_jp/beauty/products/dior-forever-cushion-hydra-glow-Y2472921.html",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",68000,1495,"DIOR Korea official","https://www.dior.com/ko_kr/beauty/products/%EB%94%94%EC%98%AC-%ED%8F%AC%EC%97%90%EB%B2%84-%ED%95%98%EC%9D%B4%EB%93%9C%EB%9D%BC-%EA%B8%80%EB%A1%9C%EC%9A%B0-%EB%A9%94%EC%89%AC-%EC%BF%A0%EC%85%98-%EB%AF%B9%EC%8A%A4-%EB%A7%A4%EC%B9%98-Y2472921.html",false,0.065)
+      ]
+    },
+    sizeNote: "สินค้านี้ต้องซื้อ 2 ชิ้นแยกกัน: ตลับเคส (ใส่ได้ครั้งเดียว ใช้ซ้ำได้เรื่อยๆ) + รีฟิลคุชชั่น (ของหมดแล้วซื้อรีฟิลใหม่ใส่ในเคสเดิมได้) — เช็กราคาได้แค่ไทย/ญี่ปุ่น/เกาหลีใต้ เพราะสินค้านี้ทำมาเพื่อผิวคนเอเชียโดยเฉพาะ ไม่พบหน้าราคาที่ยืนยันได้จากเว็บฝรั่งเศส/สหรัฐฯ จึงไม่แสดง ณ ตอนตรวจสอบสินค้าหมดสต็อกทั้ง 3 ประเทศแต่ราคาที่ใช้เป็นราคาปกติที่เว็บยังโชว์อยู่ ไม่ใช่ราคาลด"
+  },
+  {
+    id: "chanel-small-shopping-bag-calfskin",
+    brand: "CHANEL",
+    name: "Small Shopping Bag (Grained Calfskin, Gold-Tone Metal)",
+    nameTh: "กระเป๋าช้อปปิ้งโท้ทใบเล็ก หนังลูกวัวลายเกรน อะไหล่ทอง สีดำ",
+    image: "👜",
+    sizeOrder: ["15 x 32 x 11.5cm"],
+    defaultSize: "15 x 32 x 11.5cm",
+    // กระเป๋า Chanel Small Shopping Bag คอลเลกชัน Métiers d'art / Spring-Summer 2026 (คอลเลกชันแรกที่ Matthieu Blazy ออกแบบให้ชาแนล) รหัสสินค้า AS6288-B24248-94305
+    // วัสดุหนังลูกวัวลายเกรน อะไหล่โลหะสีทอง สีดำ ขนาด 15 x 32 x 11.5cm — เช็กราคาตรงจาก chanel.com แต่ละประเทศเมื่อ 2026-07-07
+    // หมายเหตุ: สินค้าแฟชั่น/กระเป๋าของ Chanel ส่วนใหญ่ไม่มีปุ่ม "ซื้อออนไลน์" ต้องนัดหมายเข้าบูติกหรือติดต่อร้านเพื่อซื้อจริง แต่ราคาที่แสดงบนเว็บเป็น Suggested Retail Price จริง ใช้เทียบราคาได้
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "15 x 32 x 11.5cm": [
+        R("ไทย","🇹🇭","THB",230500,230500,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS6288B2424894305/small-tote-grained-calfskin-gold-tone-metal/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",1197900,241616,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",11150000,245189,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",6200,234484,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS6288B2424894305/petit-cabas-veau-graine-metal-dore/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",7000,233310,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS6288B2424894305/small-shopping-bag-grained-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "กระเป๋าคอลเลกชัน Spring-Summer 2026 (Métiers d'art) เป็นสินค้าแฟชั่น/หนัง คนละหมวดกับน้ำหอม/เครื่องสำอางที่เหลือในตารางนี้ ราคาที่แสดงเป็น Suggested Retail Price บนเว็บทางการแต่ละประเทศ — Chanel มักไม่ขายกระเป๋าออนไลน์โดยตรง ต้องนัดหมายเข้าบูติกหรือติดต่อร้าน แต่ราคานี้ยืนยันจากหน้าเว็บทางการแล้ว ใช้เทียบราคาได้ตามปกติ"
+  },
+  {
+    id: "chanel-22-small-handbag-shiny-calfskin",
+    brand: "CHANEL",
+    name: "CHANEL 22 Small Handbag (Shiny Calfskin, Gold-Tone Metal)",
+    nameTh: "กระเป๋า CHANEL 22 ใบเล็ก หนังลูกวัวเคลือบเงา อะไหล่ทอง สีดำ",
+    image: "👜",
+    sizeOrder: ["35 x 37 x 7cm"],
+    defaultSize: "35 x 37 x 7cm",
+    // กระเป๋า CHANEL 22 ใบเล็ก (ทรงโฮโบ) คอลเลกชัน Spring-Summer 2026 รหัสสินค้า AS3260-B19059-94305 — ต่างจากกระเป๋า Small Shopping Bag ตัวก่อนหน้าตรงที่ใบนี้มีชื่อรุ่น/ไลน์จริง คือ "CHANEL 22" (เป็นไลน์กระเป๋าประจำแบรนด์ ไม่ใช่แค่ชื่อสินค้าทั่วไป)
+    // วัสดุหนังลูกวัวเคลือบเงา อะไหล่โลหะสีทอง สีดำ ขนาด 35 x 37 x 7cm — เช็กราคาตรงจาก chanel.com แต่ละประเทศเมื่อ 2026-07-07
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "35 x 37 x 7cm": [
+        R("ไทย","🇹🇭","THB",219000,219000,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",1028500,207448,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",9560000,210224,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",5650,213683,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS3260B1905994305/petit-sac-chanel-22-veau-brillant-metal-dore/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",6100,203313,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS3260B1905994305/chanel-22-small-handbag-shiny-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "กระเป๋านี้เป็นไลน์ \"CHANEL 22\" (ทรงโฮโบ) คอลเลกชัน Spring-Summer 2026 ต่างจาก Small Shopping Bag ตัวก่อนหน้าตรงที่รอบนี้ไทยไม่ใช่ประเทศที่ถูกสุด — สหรัฐฯ ถูกสุด ตามด้วยญี่ปุ่น เกาหลีใต้ ฝรั่งเศส และไทยแพงสุด (ต่างจากกระเป๋าใบก่อนที่ไทยถูกสุด) แสดงว่าราคาไม่ได้ถูกกว่าที่ไทยเสมอไป ต้องเช็กเป็นชิ้นๆ ไป ราคาที่แสดงเป็น Suggested Retail Price บนเว็บทางการแต่ละประเทศ"
+  },
+  {
+    id: "chanel-25-small-handbag-calfskin",
+    brand: "CHANEL",
+    name: "CHANEL 25 Small Handbag (Calfskin, Gold-Tone Metal)",
+    nameTh: "กระเป๋า CHANEL 25 ใบเล็ก หนังลูกวัว อะไหล่ทอง สีดำและสีขาว",
+    image: "👜",
+    sizeOrder: ["30 x 26 x 14cm"],
+    defaultSize: "30 x 26 x 14cm",
+    // กระเป๋า CHANEL 25 ใบเล็ก (ทรงโฮโบ เปิดตัวปี 2025) คอลเลกชัน Spring-Summer 2026 รหัสสินค้า AS5293-B24123-U9622 — เป็นไลน์กระเป๋าประจำแบรนด์อีกไลน์หนึ่ง (คนละไลน์กับ CHANEL 22)
+    // วัสดุหนังลูกวัว อะไหล่โลหะสีทอง สีดำและสีขาว ขนาด 30 x 26 x 14cm — เช็กราคาตรงจาก chanel.com แต่ละประเทศเมื่อ 2026-07-07
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "30 x 26 x 14cm": [
+        R("ไทย","🇹🇭","THB",237000,237000,"CHANEL Thailand official","https://www.chanel.com/th/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",1184700,238954,"CHANEL Japan official","https://www.chanel.com/jp/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",10790000,237272,"CHANEL Korea official","https://www.chanel.com/kr/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",6200,234484,"CHANEL France official","https://www.chanel.com/fr/mode/p/AS5293B24123U9622/petit-sac-chanel-25-veau-metal-dore/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",6900,229977,"CHANEL.com US official","https://www.chanel.com/us/fashion/p/AS5293B24123U9622/chanel-25-small-handbag-calfskin-gold-tone-metal/")
+      ]
+    },
+    sizeNote: "กระเป๋านี้เป็นไลน์ \"CHANEL 25\" (ทรงโฮโบ เปิดตัวปี 2025) คนละไลน์กับ CHANEL 22 — รอบนี้ราคาใกล้เคียงกันมากทั้ง 5 ประเทศ (ห่างกันไม่ถึง 4%) สหรัฐฯ ถูกสุด ตามด้วยฝรั่งเศส ไทย เกาหลีใต้ และญี่ปุ่นแพงสุด แสดงว่าบางรุ่นราคาแทบไม่ต่างกันเลยไม่ว่าจะซื้อประเทศไหน ราคาที่แสดงเป็น Suggested Retail Price บนเว็บทางการแต่ละประเทศ"
+  },
+  {
+    id: "chanel-premiere-edition-originale-watch",
+    brand: "CHANEL",
+    name: "Première Édition Originale Watch (Steel coated with Yellow Gold, Black Leather)",
+    nameTh: "นาฬิกา Première Édition Originale สตีลเคลือบเยลโลว์โกลด์ สายหนังสีดำ หน้าปัดเคลือบแลคเกอร์สีดำ",
+    image: "⌚",
+    sizeOrder: ["26.1 x 20 x 7.6mm"],
+    defaultSize: "26.1 x 20 x 7.6mm",
+    // นาฬิกา CHANEL Première Édition Originale รหัสสินค้า H6951 — เป็นสินค้าหมวด "นาฬิกา" ตัวแรกในตารางนี้ (คนละหมวดกับน้ำหอม/เครื่องสำอาง/กระเป๋าที่มีอยู่แล้ว) รีอิชชูของนาฬิกาเรือนแรกของ Chanel ในไลน์ Première
+    // วัสดุ: ตัวเรือนสตีลเคลือบเยลโลว์โกลด์ 18K (0.1 ไมครอน) สายโซ่สตีลเคลือบทองร้อยกับสายหนังสีดำ หน้าปัดเคลือบแลคเกอร์สีดำ ขนาดตัวเรือน 26.1 x 20 x 7.6mm — เช็กราคาตรงจาก chanel.com แต่ละประเทศเมื่อ 2026-07-07
+    // หมายเหตุ: หมวดนาฬิกา/ไฟน์จิวเวลรี่ของ Chanel ระบุชัดในเมนูเว็บว่า "เฉพาะในบูติคเท่านั้น" (Exclusively in Boutiques) เข้มกว่ากระเป๋าที่อย่างน้อยยังมีปุ่ม "เพิ่มลงตะกร้า" ปรากฏใน metadata — หน้านาฬิกาจริงมีแต่ปุ่ม "ติดต่อเรา"/Click & Collect เท่านั้น แต่ราคาที่แสดงเป็น Suggested/Recommended Retail Price ที่ยืนยันได้จริงจากหน้าเว็บ ใช้เทียบราคาได้เหมือนกระเป๋า
+    // ฝรั่งเศสใช้ path /horlogerie/ (คำว่า "นาฬิกา" ในภาษาฝรั่งเศส) แทน /watches/ ของประเทศอื่น — URL เต็ม: https://www.chanel.com/fr/horlogerie/p/H6951/montre-premiere-edition-originale/
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "26.1 x 20 x 7.6mm": [
+        R("ไทย","🇹🇭","THB",209000,209000,"CHANEL Thailand official","https://www.chanel.com/th/watches/p/H6951/premiere-edition-originale-watch/",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",990000,199683,"CHANEL Japan official","https://www.chanel.com/jp/watches/p/H6951/premiere-edition-originale-watch/",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",9800000,215502,"CHANEL Korea official","https://www.chanel.com/kr/watches/p/H6951/premiere-edition-originale-watch/",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",5650,213683,"CHANEL France official","https://www.chanel.com/fr/horlogerie/p/H6951/montre-premiere-edition-originale/",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",5900,196647,"CHANEL.com US official","https://www.chanel.com/us/watches/p/H6951/premiere-edition-originale-watch/")
+      ]
+    },
+    sizeNote: "นาฬิกาเรือนแรกในตารางนี้ (ก่อนหน้ามีแต่น้ำหอม/เครื่องสำอาง/กระเป๋า) เป็นสินค้าหมวดนาฬิกาที่ระบุชัดว่า \"เฉพาะในบูติคเท่านั้น\" ไม่มีปุ่มซื้อออนไลน์จริง แต่ราคาที่แสดงเป็น Suggested Retail Price ที่ยืนยันจากเว็บทางการแล้ว รอบนี้สหรัฐฯ ถูกสุด ตามด้วยญี่ปุ่น ไทย ฝรั่งเศส และเกาหลีใต้แพงสุด — ไทยอยู่กลางตาราง ไม่ใช่ทั้งถูกสุดหรือแพงสุด"
+  },
+  {
+    id: "lamer-balancing-treatment-lotion",
+    brand: "LA MER",
+    name: "The NEW Balancing Treatment Lotion",
+    nameTh: "โลชั่นบำรุงผิว The NEW Balancing Treatment Lotion (สูตรสำหรับผิวมันผสม)",
+    image: "💧",
+    sizeOrder: ["150ml"],
+    defaultSize: "150ml",
+    // La Mer The NEW Balancing Treatment Lotion (รหัสสินค้า 138014) — โลชั่นน้ำตบสูตรใหม่สำหรับผิวมันผสม เพิ่งเปิดตัว (สถานะ Pre-Order บนเว็บสหรัฐฯ ณ วันที่เช็ก) เช็กราคาเมื่อ 2026-07-08
+    // หมายเหตุสำคัญ: La Mer ไม่มีเว็บขายตรง (checkout) เป็นของตัวเองในไทย — lamer.co.th เป็นแค่หน้า landing ที่ลิงก์ไปร้านค้าที่ได้รับอนุญาตอย่าง Central Online และ Lazada เท่านั้น (สินค้าตัวนี้ยังไม่เปิดหน้าขายบน lamer.co.th ด้วยซ้ำ ณ วันที่เช็ก) ราคาไทยในตารางนี้จึงมาจาก Central Online ซึ่งเป็นช่องทางที่ได้รับอนุญาตอย่างเป็นทางการจาก La Mer Thailand เอง (ผู้ใช้ยืนยันราคาให้โดยตรงจากหน้าเว็บ Central Online เนื่องจากหน้านี้ต้องใช้ JavaScript render ทำให้ดึงข้อมูลอัตโนมัติไม่ได้)
+    // ญี่ปุ่น/เกาหลีใต้/ฝรั่งเศส/สหรัฐฯ ยืนยันราคาตรงจากเว็บทางการของแบรนด์เอง (delamer.jp, lamerkorea.com, cremedelamer.fr, cremedelamer.com)
+    // อัตราแลกเปลี่ยนใช้ mid-market rate จาก Wise ณ วันเดียวกัน: 1 JPY=0.2017, 1 KRW=0.02199, 1 EUR=37.82, 1 USD=33.33 THB
+    sizes: {
+      "150ml": [
+        R("ไทย","🇹🇭","THB",7200,7200,"Central Online (ช่องทางที่ได้รับอนุญาตอย่างเป็นทางการจาก La Mer Thailand)","https://www.central.co.th/en/lamer-the-balancing-treatment-lotion-150-ml-cds22497628",true),
+        R("ญี่ปุ่น","🇯🇵","JPY",22000,4437,"La Mer Japan official (delamer.jp, ราคารวมภาษี)","https://www.delamer.jp/product/11484/138014/prep/the-balancing-treatment-lotion",false,0.1),
+        R("เกาหลีใต้","🇰🇷","KRW",262000,5761,"La Mer Korea official","https://www.lamerkorea.com/product/32873/138014/face/watery_lotions/--",false,0.065),
+        R("ฝรั่งเศส","🇫🇷","EUR",195,7375,"La Mer France official","https://www.cremedelamer.fr/product/11484/138014/prep/the-new-balancing-treatment-lotion",false,0.115),
+        R("สหรัฐอเมริกา","🇺🇸","USD",200,6666,"La Mer US official (สถานะ Pre-Order ณ วันที่เช็ก)","https://www.cremedelamer.com/product/11484/138014/prep/the-new-balancing-treatment-lotion")
+        // เช็ก King Power Thailand แล้ว (SKU 1093543, 150ml ยืนยันแล้ว) ราคา 6,450 บาท ถูกกว่า Central Online (7,200 บาท) ก็จริง แต่ยังแพงกว่าญี่ปุ่น (4,437 บาท) ซึ่งเป็นราคาถูกที่สุดโดยรวม จึงไม่ใส่แถวนี้
+      ]
+    },
+    sizeNote: "สินค้าใหม่เพิ่งเปิดตัว (เว็บสหรัฐฯ ยังโชว์สถานะ Pre-Order) — La Mer ไม่มีเว็บขายตรงในไทย ราคาไทยจึงมาจาก Central Online (ช่องทางที่ได้รับอนุญาตอย่างเป็นทางการ ไม่ใช่ราคาประมาณ) ส่วนอีก 4 ประเทศยืนยันตรงจากเว็บแบรนด์เอง — รอบนี้ญี่ปุ่นถูกสุดชัดเจน (ถูกกว่าไทยกว่า 38%) ตามด้วยเกาหลีใต้ สหรัฐฯ ไทย และฝรั่งเศสแพงสุด"
+  }
+];
+// ================================================================
+
+const grid = document.getElementById('grid');
+const emptyEl = document.getElementById('empty');
+const detailEl = document.getElementById('detail');
+const searchInput = document.getElementById('search');
+let activeId = null;
+let activeSize = null;
+
+function getCheapestNonBase(rows){
+  const others = rows.filter(x=>!x.isBase);
+  return others.reduce((a,b)=> b.thb < a.thb ? b : a, others[0]);
+}
+
+function splitNameSpec(str){
+  const idx = str.indexOf('(');
+  if(idx === -1) return {main: str, spec: ''};
+  return {main: str.slice(0, idx).trim(), spec: str.slice(idx).trim()};
+}
+
+function renderGrid(list){
+  grid.innerHTML = '';
+  emptyEl.style.display = list.length ? 'none' : 'block';
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'pcard' + (p.id===activeId ? ' active':'');
+    const rows = p.sizes[p.defaultSize];
+    const cheapest = getCheapestNonBase(rows);
+    const {main, spec} = splitNameSpec(p.nameTh);
+    card.innerHTML = `
+      <div class="name">${p.brand} — ${main}</div>
+      ${spec ? `<div class="spec">${spec}</div>` : ''}
+      <div class="meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' ไซส์ · ' : ''}${rows.length} ประเทศ (${p.defaultSize}) · ถูกสุดที่ ${cheapest.flag} ${cheapest.country}</div>
+    `;
+    card.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
+    grid.appendChild(card);
+  });
+}
+
+function showDetail(p){
+  const size = activeSize && p.sizes[activeSize] ? activeSize : p.defaultSize;
+  activeSize = size;
+  const rows = p.sizes[size];
+  const base = rows.find(x=>x.isBase) || rows[0];
+  const cheapest = getCheapestNonBase(rows);
+
+  const sizePills = p.sizeOrder.length > 1 ? `
+    <div class="sizebar">
+      ${p.sizeOrder.map(s => `<button class="sizepill${s===size?' active':''}" data-size="${s}">${s}</button>`).join('')}
+    </div>
+    ${p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : ''}
+  ` : (p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : '');
+
+  const rowsHtml = [...rows].sort((a,b)=>a.thb-b.thb).map(row=>{
+    const diffPct = ((row.thb - base.thb) / base.thb * 100);
+    let diffLabel, diffClass;
+    if(row.isBase){ diffLabel = 'ราคาไทย (ฐาน)'; diffClass='base'; }
+    else if(diffPct < 0){ diffLabel = `ถูกกว่า ${Math.abs(diffPct).toFixed(0)}%`; diffClass='cheap'; }
+    else if(diffPct > 0){ diffLabel = `แพงกว่า ${diffPct.toFixed(0)}%`; diffClass='exp'; }
+    else { diffLabel = 'เท่ากัน'; diffClass='base'; }
+
+    const isCheapestBadge = (row===cheapest) ? `<span class="badge best">ถูกที่สุด</span>` : '';
+    const isThaiBadge = row.isBase ? `<span class="badge thai">ไทย</span>` : '';
+
+    return `
+      <tr>
+        <td class="country"><span class="cname">${row.flag} ${row.country}</span>${(isThaiBadge||isCheapestBadge) ? `<div class="badges">${isThaiBadge}${isCheapestBadge}</div>` : ''}</td>
+        <td class="local">${row.localPrice.toLocaleString()} ${row.currency}</td>
+        <td class="price">฿${row.thb.toLocaleString()}</td>
+        <td class="diff ${diffClass}">${diffLabel}</td>
+        <td class="src">${row.retailer}<br><a href="${row.url}" target="_blank" rel="noopener">ลิงก์ร้าน</a>${row.altUrl ? ` · <a href="${row.altUrl}" target="_blank" rel="noopener">${row.altLabel||'ลิงก์สำรอง'}</a>` : ''} · เช็ก ${row.updated}${row.refundPct ? `<div class="refund">≈ ฿${Math.round(row.thb*(1-row.refundPct)).toLocaleString()} หลังคืนภาษีนักท่องเที่ยว (ประมาณ ${Math.round(row.refundPct*100)}% ของราคา — เป็นตัวเลขอ้างอิงคร่าวๆ ไม่ใช่ราคายืนยัน)</div>` : ''}</td>
+      </tr>`;
+  }).join('');
+
+  const {main: detailMain, spec: detailSpec} = splitNameSpec(p.nameTh);
+  detailEl.innerHTML = `
+    <h2>${p.brand} — ${detailMain}</h2>
+    ${detailSpec ? `<div class="spec">${detailSpec}</div>` : ''}
+    <div class="sub">${p.name} · ไซส์ ${size} · เทียบราคาแปลงเป็นเงินบาท (อัตราแลกเปลี่ยนโดยประมาณ)</div>
+    ${sizePills}
+    <table>
+      <thead><tr><th>ประเทศ</th><th>ราคาท้องถิ่น</th><th>เทียบเป็นบาท</th><th>ส่วนต่างจากไทย</th><th>แหล่งข้อมูล</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  `;
+  detailEl.classList.add('show');
+  detailEl.querySelectorAll('.sizepill').forEach(btn=>{
+    btn.onclick = ()=>{ activeSize = btn.dataset.size; showDetail(p); };
+  });
+  detailEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function currentList(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q) return PRODUCTS;
+  return PRODUCTS.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.nameTh.toLowerCase().includes(q) ||
+    p.brand.toLowerCase().includes(q)
+  );
+}
+
+searchInput.addEventListener('input', ()=> renderGrid(currentList()));
+
+// ===================== ตัวคำนวณราคาโดยประมาณหลังคืนภาษี =====================
+const CALC_RATES = [
+  {label:"ญี่ปุ่น", flag:"🇯🇵", pct:0.10, note:"ร้าน Tax-Free คืนภาษีผู้บริโภค ~10% ให้ทันที ณ จุดขาย (ระบบปัจจุบัน — ใช้ได้ถึงก่อน 1 พ.ย. 2026 ก่อนเปลี่ยนเป็น \"จ่ายเต็มแล้วขอคืนที่สนามบินภายหลัง\") ⚠️ น้ำหอม/เครื่องสำอางจัดเป็น \"ของใช้สิ้นเปลือง (consumables)\" มีเพดานซื้อสูงสุด ¥500,000 ต่อร้านต่อวัน (≈฿100,850) ถ้าซื้อเกินนี้ในร้านเดียววันเดียว ส่วนเกินจะไม่ได้รับยกเว้นภาษี — เพดานนี้จะถูกยกเลิกหลัง 1 พ.ย. 2026"},
+  {label:"เกาหลีใต้", flag:"🇰🇷", pct:0.065, note:"ขอคืน VAT ผ่านตัวแทน (Global Blue, Global Tax Free ฯลฯ) ได้สุทธิหลังหักค่าธรรมเนียมประมาณ 5–8% (ขั้นต่ำซื้อ ~15,000 วอน/ร้าน/วัน) ⚠️ การคืนภาษีทันที (Immediate Refund) ที่ร้านมีเพดาน: สูงสุด ₩1,000,000/ใบเสร็จ (≈฿21,990), ₩600,000/ร้าน/วัน (≈฿13,194), และรวมทั้งทริปไม่เกิน ₩5,000,000 (≈฿109,950) — ถ้าซื้อเกินเพดานนี้ยังคืนได้ แต่ต้องไปทำเรื่องที่สนามบินแทน ไม่ได้คืนทันทีที่ร้าน"},
+  {label:"ฝรั่งเศส", flag:"🇫🇷", pct:0.115, note:"ขอคืน VAT ผ่าน Global Blue/Planet ได้สุทธิหลังหักค่าธรรมเนียมประมาณ 10–13% (ขั้นต่ำซื้อ มากกว่า €100/ร้าน/วัน) — ค้นข้อมูลแล้วไม่พบเพดานซื้อสูงสุดที่ยืนยันได้ชัดเจน (ต่างจากญี่ปุ่น/เกาหลีที่มีเพดานระบุชัด) ถ้าซื้อจำนวนมากแนะนำสอบถามร้าน/เคาน์เตอร์คืนภาษีโดยตรงก่อน"}
+];
+const calcPriceEl = document.getElementById('calcPrice');
+const calcResultsEl = document.getElementById('calcResults');
+const calcCountryBarEl = document.getElementById('calcCountryBar');
+let calcCountryIdx = 0;
+function renderCalcBar(){
+  calcCountryBarEl.innerHTML = CALC_RATES.map((c,i)=>`<button type="button" class="calcpill${i===calcCountryIdx?' active':''}" data-i="${i}">${c.flag} ${c.label}</button>`).join('');
+  calcCountryBarEl.querySelectorAll('.calcpill').forEach(btn=>{
+    btn.onclick = ()=>{ calcCountryIdx = parseInt(btn.dataset.i, 10); renderCalcBar(); renderCalc(); };
+  });
+}
+function renderCalc(){
+  const v = parseFloat(calcPriceEl.value);
+  const c = CALC_RATES[calcCountryIdx];
+  const result = (v>0) ? `฿${Math.round(v*(1-c.pct)).toLocaleString()}` : '—';
+  calcResultsEl.innerHTML = `<div class="calc-row">
+    <div class="calc-country">${c.flag} ${c.label} <b>-${Math.round(c.pct*100)}%</b></div>
+    <div class="calc-result">${result}</div>
+    <div class="calc-note">${c.note}</div>
+  </div>`;
+}
+if(calcPriceEl){
+  renderCalcBar();
+  calcPriceEl.addEventListener('input', renderCalc);
+  renderCalc();
+}
+
+// init
+renderGrid(PRODUCTS);
+if(PRODUCTS.length){
+  activeId = PRODUCTS[0].id;
+  activeSize = PRODUCTS[0].defaultSize;
+  renderGrid(PRODUCTS);
+  showDetail(PRODUCTS[0]);
+}
+</script>
+
+</body>
+</html>
