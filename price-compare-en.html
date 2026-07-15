@@ -22,8 +22,12 @@
   .eyebrow{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:var(--section);color:var(--sub);font-size:12.5px;font-weight:600;margin-bottom:20px;}
   header h1{margin:0 0 14px;font-size:37px;font-weight:700;letter-spacing:-.02em;color:var(--ink);}
   header p{margin:0 auto 26px;color:var(--sub);font-size:17px;font-weight:400;max-width:520px;line-height:1.55;}
-  .trust-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
-  .trust-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--sub);box-shadow:var(--shadow-sm);}
+  .country-filter-label{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:10px;}
+  .country-pillrow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+  .country-pill{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s;}
+  .country-pill:hover{border-color:var(--accent2);color:var(--accent2);}
+  .country-pill.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+  .country-empty{padding:24px;text-align:center;color:var(--sub);font-size:13.5px;background:var(--section);border-radius:var(--r-md);}
   .lang-switch{position:absolute;top:20px;right:20px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;box-shadow:var(--shadow-sm);transition:border-color .15s,color .15s;}
   .lang-switch:hover{border-color:var(--accent2);color:var(--accent2);}
   .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 60px;}
@@ -51,8 +55,13 @@
     .maincol{position:sticky;top:20px;}
   }
 
-  .grid-label{font-size:11.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 6px;padding:0 4px;}
-  .grid-label:first-child{margin-top:6px;}
+  .drill-row{display:flex;align-items:center;gap:8px;padding:12px 10px;border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-size:14px;color:var(--ink);border-bottom:1px solid var(--line);transition:background .12s;}
+  .drill-row:last-child{border-bottom:none;}
+  .drill-row:hover{background:var(--section);}
+  .drill-count{color:var(--sub);font-weight:500;font-size:12.5px;margin-left:auto;}
+  .drill-arrow{color:var(--sub);font-size:16px;}
+  .drill-crumb{display:flex;align-items:center;gap:4px;width:100%;text-align:left;background:none;border:none;padding:10px 6px;margin-bottom:2px;font-size:13px;font-weight:600;color:var(--accent2);cursor:pointer;}
+  .drill-crumb:hover{text-decoration:underline;}
 
   .productlist{display:flex;flex-direction:column;}
   .prow{display:flex;gap:12px;align-items:center;padding:9px 6px;border-radius:var(--r-sm);cursor:pointer;transition:background .12s;border-bottom:1px solid var(--line);}
@@ -143,11 +152,8 @@
     <div class="eyebrow">🌍 Global Price Tool</div>
     <h1>Global Price Comparison</h1>
     <p>Check before you buy abroad — official prices from each country, converted to THB, so you can decide with confidence</p>
-    <div class="trust-row">
-      <span class="trust-chip">✅ Verified official prices</span>
-      <span class="trust-chip">🌍 5 countries</span>
-      <span class="trust-chip">🆓 Free, no sign-up</span>
-    </div>
+    <div class="country-filter-label">Filter prices by country</div>
+    <div class="country-pillrow" id="countryFilter"></div>
   </div>
 </header>
 
@@ -514,14 +520,43 @@ const PRODUCTS = [
 
 const grid = document.getElementById('grid');
 const popularBrandsEl = document.getElementById('popularBrands');
+const countryFilterEl = document.getElementById('countryFilter');
 const emptyEl = document.getElementById('empty');
 const detailEl = document.getElementById('detail');
 const searchInput = document.getElementById('search');
 let activeId = null;
 let activeSize = null;
+let currentProduct = null;
 
-// Category order used to group all products when browsing (not searching) — add new categories by adding to this list
+// Category order used for the drill-down (not searching) — add new categories by adding to this list
 const CATEGORY_ORDER = ["Fragrance","Makeup & Skincare","Bags","Watches"];
+// Left-side drill-down state: null = that level hasn't been picked yet (starts at category level)
+let drillCategory = null;
+let drillBrand = null;
+
+// Countries available for the price-only-this-country filter (replaces the old trust chips)
+const COUNTRY_FILTERS = [
+  {label:"Thailand", flag:"🇹🇭"},
+  {label:"Japan", flag:"🇯🇵"},
+  {label:"South Korea", flag:"🇰🇷"},
+  {label:"France", flag:"🇫🇷"},
+  {label:"USA", flag:"🇺🇸"}
+];
+let selectedCountry = null; // null = all countries
+
+function renderCountryFilter(){
+  const allBtn = `<button type="button" class="country-pill${selectedCountry===null ? ' active' : ''}" data-country="">All</button>`;
+  const countryBtns = COUNTRY_FILTERS.map(c=>`<button type="button" class="country-pill${selectedCountry===c.label ? ' active' : ''}" data-country="${c.label}">${c.flag} ${c.label}</button>`).join('');
+  countryFilterEl.innerHTML = allBtn + countryBtns;
+  countryFilterEl.querySelectorAll('.country-pill').forEach(btn=>{
+    btn.onclick = ()=>{
+      selectedCountry = btn.dataset.country || null;
+      renderCountryFilter();
+      renderGrid(currentList());
+      if(currentProduct) showDetail(currentProduct);
+    };
+  });
+}
 
 function getCheapestNonBase(rows){
   const others = rows.filter(x=>!x.isBase);
@@ -543,13 +578,20 @@ function buildCard(p){
   const row = document.createElement('div');
   row.className = 'prow' + (p.id===activeId ? ' active':'');
   const rows = p.sizes[p.defaultSize];
-  const cheapest = getCheapestNonBase(rows);
   const {main} = splitNameSpec(p.name);
+  let metaText;
+  if(selectedCountry){
+    const countryRow = rows.find(r=>r.country===selectedCountry);
+    metaText = countryRow ? `฿${countryRow.thb.toLocaleString()} in ${selectedCountry}` : `Not sold in ${selectedCountry}`;
+  } else {
+    const cheapest = getCheapestNonBase(rows);
+    metaText = `${p.sizeOrder.length>1 ? p.sizeOrder.length+' sizes · ' : ''}${rows.length} countries · cheapest in ${cheapest.flag} ${cheapest.country}`;
+  }
   row.innerHTML = `
     ${renderThumb(p.image, 'prow-thumb')}
     <div class="prow-body">
       <div class="prow-name">${p.brand} — ${main}</div>
-      <div class="prow-meta">${p.sizeOrder.length>1 ? p.sizeOrder.length+' sizes · ' : ''}${rows.length} countries · cheapest in ${cheapest.flag} ${cheapest.country}</div>
+      <div class="prow-meta">${metaText}</div>
     </div>
   `;
   row.onclick = ()=>{ activeId = p.id; activeSize = p.defaultSize; renderGrid(currentList()); showDetail(p); };
@@ -561,24 +603,58 @@ function renderGrid(list){
   emptyEl.style.display = list.length ? 'none' : 'block';
   const isSearching = searchInput.value.trim().length > 0;
 
-  // While searching: show a flat list of matches, no category grouping needed
+  // While searching (or a Popular Brand click): show a flat list, skip the drill-down
   if(isSearching){
     list.forEach(p=> grid.appendChild(buildCard(p)));
     return;
   }
 
-  // Normal view: show all products, grouped by category so it's easy to browse
-  CATEGORY_ORDER.forEach(cat=>{
-    const catProducts = list.filter(p=>p.category===cat);
-    if(!catProducts.length) return;
+  // Level 0: no category picked yet — show the category list
+  if(drillCategory === null){
+    CATEGORY_ORDER.forEach(cat=>{
+      const catProducts = PRODUCTS.filter(p=>p.category===cat);
+      if(!catProducts.length) return;
+      const row = document.createElement('div');
+      row.className = 'drill-row';
+      row.innerHTML = `<span>${cat}</span><span class="drill-count">${catProducts.length}</span><span class="drill-arrow">›</span>`;
+      row.onclick = ()=>{ drillCategory = cat; drillBrand = null; renderGrid(currentList()); };
+      grid.appendChild(row);
+    });
+    return;
+  }
 
-    const label = document.createElement('div');
-    label.className = 'grid-label';
-    label.textContent = cat;
-    grid.appendChild(label);
+  // Level 1: category picked, no brand yet — show the brand list within that category
+  if(drillBrand === null){
+    const crumb = document.createElement('button');
+    crumb.type = 'button';
+    crumb.className = 'drill-crumb';
+    crumb.innerHTML = `‹ All`;
+    crumb.onclick = ()=>{ drillCategory = null; renderGrid(currentList()); };
+    grid.appendChild(crumb);
 
-    catProducts.forEach(p=> grid.appendChild(buildCard(p)));
-  });
+    const catProducts = PRODUCTS.filter(p=>p.category===drillCategory);
+    const brands = [...new Set(catProducts.map(p=>p.brand))];
+    brands.forEach(brand=>{
+      const brandProducts = catProducts.filter(p=>p.brand===brand);
+      const row = document.createElement('div');
+      row.className = 'drill-row';
+      row.innerHTML = `<span>${brand}</span><span class="drill-count">${brandProducts.length}</span><span class="drill-arrow">›</span>`;
+      row.onclick = ()=>{ drillBrand = brand; renderGrid(currentList()); };
+      grid.appendChild(row);
+    });
+    return;
+  }
+
+  // Level 2: category + brand picked — show the actual products
+  const crumb = document.createElement('button');
+  crumb.type = 'button';
+  crumb.className = 'drill-crumb';
+  crumb.innerHTML = `‹ ${drillCategory}`;
+  crumb.onclick = ()=>{ drillBrand = null; renderGrid(currentList()); };
+  grid.appendChild(crumb);
+
+  PRODUCTS.filter(p=>p.category===drillCategory && p.brand===drillBrand)
+    .forEach(p=> grid.appendChild(buildCard(p)));
 }
 
 function renderPopularBrands(){
@@ -596,11 +672,13 @@ function renderPopularBrands(){
 }
 
 function showDetail(p){
+  currentProduct = p;
   const size = activeSize && p.sizes[activeSize] ? activeSize : p.defaultSize;
   activeSize = size;
-  const rows = p.sizes[size];
-  const base = rows.find(x=>x.isBase) || rows[0];
-  const cheapest = getCheapestNonBase(rows);
+  const allRows = p.sizes[size];
+  const base = allRows.find(x=>x.isBase) || allRows[0];
+  const cheapest = getCheapestNonBase(allRows);
+  const rows = selectedCountry ? allRows.filter(r=>r.country===selectedCountry) : allRows;
 
   const sizePills = p.sizeOrder.length > 1 ? `
     <div class="sizebar">
@@ -609,7 +687,7 @@ function showDetail(p){
     ${p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : ''}
   ` : (p.sizeNote ? `<div class="sizenote">ℹ️ ${p.sizeNote}</div>` : '');
 
-  const rowsHtml = [...rows].sort((a,b)=>a.thb-b.thb).map(row=>{
+  const rowsHtml = rows.length ? [...rows].sort((a,b)=>a.thb-b.thb).map(row=>{
     const diffPct = ((row.thb - base.thb) / base.thb * 100);
     let diffLabel, diffClass;
     if(row.isBase){ diffLabel = 'Thailand price (base)'; diffClass='base'; }
@@ -641,7 +719,7 @@ function showDetail(p){
           <div class="pc-checked">checked ${row.updated}</div>
         </div>
       </div>`;
-  }).join('');
+  }).join('') : '';
 
   const {main: detailMain, spec: detailSpec} = splitNameSpec(p.name);
   detailEl.innerHTML = `
@@ -654,7 +732,7 @@ function showDetail(p){
       </div>
     </div>
     ${sizePills}
-    <div class="pricecards">${rowsHtml}</div>
+    ${rows.length ? `<div class="pricecards">${rowsHtml}</div>` : `<div class="country-empty">No price data for this product in ${selectedCountry} for this size</div>`}
   `;
   detailEl.classList.add('show');
   detailEl.querySelectorAll('.sizepill').forEach(btn=>{
@@ -707,6 +785,7 @@ if(calcPriceEl){
 }
 
 // init
+renderCountryFilter();
 renderPopularBrands();
 renderGrid(PRODUCTS);
 if(PRODUCTS.length){
